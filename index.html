@@ -34,7 +34,7 @@
             -webkit-font-smoothing: antialiased; /* Giúp chữ mượt hơn trên iPhone */
         }
 
-        /* --- BACKGROUND (Gradient nhẹ) --- */
+        /* --- BACKGROUND (Gradient nhẹ, không dùng vật thể bay gây lag) --- */
         .bg-gradient {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -98,7 +98,7 @@
 
         h1 {
             font-family: 'Dancing Script', cursive;
-            font-size: 3em; 
+            font-size: 3em; /* Chữ to vừa phải trên iPhone 6 Plus */
             margin: 10px 0;
             background: linear-gradient(to right, #ff6b6b, #ffe66d);
             -webkit-background-clip: text;
@@ -120,7 +120,7 @@
             border-radius: 20px;
             padding: 30px 20px;
             margin-bottom: 40px;
-            text-align: justify;
+            text-align: justify; /* Căn đều 2 bên cho đẹp */
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
@@ -137,7 +137,7 @@
             line-height: 1.6;
         }
 
-        /* --- ẢNH KỶ NIỆM --- */
+        /* --- ẢNH KỶ NIỆM (Xếp dọc) --- */
         .photo-list {
             display: flex;
             flex-direction: column;
@@ -150,12 +150,12 @@
             padding: 10px 10px 40px 10px;
             border-radius: 4px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transform: rotate(-2deg);
+            transform: rotate(-2deg); /* Nghiêng nhẹ cho nghệ */
             transition: transform 0.3s;
         }
         
         .photo-item:nth-child(even) { transform: rotate(2deg); }
-        .photo-item:active { transform: scale(0.98); }
+        .photo-item:active { transform: scale(0.98); } /* Hiệu ứng khi ấn vào */
 
         .photo-item img {
             width: 100%;
@@ -185,7 +185,7 @@
             box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
             cursor: pointer;
             margin-bottom: 50px;
-            width: 100%;
+            width: 100%; /* Nút rộng dễ bấm */
         }
         
         .btn-celebrate:active {
@@ -203,7 +203,7 @@
     <div class="music-btn" onclick="toggleMusic()">
         <i class="fas fa-music" id="music-icon"></i>
     </div>
-    
+    <!-- Link nhạc demo nhẹ nhàng -->
     <audio id="bg-music" loop>
         <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
     </audio>
@@ -213,7 +213,7 @@
         <!-- Phần đầu: Avatar & Tên -->
         <header>
             <div class="avatar-box" data-aos="zoom-in">
-                <!-- Đường dẫn ảnh nội bộ của bạn -->
+                <!-- Thay link ảnh chị bạn vào đây -->
                 <img src="./img/img1.jpg" alt="Avatar">
             </div>
             <h1 data-aos="fade-up">Chúc Mừng Chị Yêu!</h1>
@@ -222,10 +222,10 @@
             </div>
         </header>
 
-        <!-- Phần Lời chúc (Đã sửa cho Cao Đẳng) -->
+        <!-- Phần Lời chúc -->
         <div class="message-card" data-aos="fade-up">
-            <h2>Thư Gửi Chị Baaa 💌</h2>
-            <p>
+            <h2>Thư Gửi Chị Baaa💌</h2>
+           <p>
                 "Hello Tân Cử Nhân Cao Đẳng! 🎓<br><br>
                 Chúc mừng chị đã chính thức hoàn thành chặng đường 3 năm đèn sách vất vả. Từ nay không còn cảnh chạy deadline thâu đêm nữa rồi nhaaaaa.<br><br>
                 Em chúc chị ra trường <b>có việc làm ngay</b>, công việc thuận lợi, lương cao và sớm thực hiện được ước mơ của mình.<br><br>
@@ -234,23 +234,26 @@
             </p>
         </div>
 
-        <!-- Phần Ảnh -->
+        <!-- Phần Ảnh (Xếp dọc dễ xem) -->
         <h2 style="font-family: 'Dancing Script'; font-size: 2.5em; margin-bottom: 30px;">Kỷ Niệm Đáng Nhớ</h2>
         <div class="photo-list">
             
+            <!-- Ảnh 1 -->
             <div class="photo-item" data-aos="fade-right">
                 <img src="./img/img2.jpg" alt="Photo 1">
                 <div class="caption">Ngày nhập học</div>
             </div>
 
+            <!-- Ảnh 2 -->
             <div class="photo-item" data-aos="fade-left">
                 <img src="./img/img3.jpg" alt="Photo 2">
                 <div class="caption">Thanh xuân rực rỡ</div>
             </div>
 
+            <!-- Ảnh 3 -->
             <div class="photo-item" data-aos="fade-right">
                 <img src="./img/img4.jpg" alt="Photo 3">
-                <div class="caption">Kỉ niệm cùng bạn thân</div>
+                <div class="caption">Kỉ niệm cùng bạn thân </div>
             </div>
 
         </div>
@@ -270,27 +273,28 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
     <script>
-        // Kích hoạt hiệu ứng cuộn
+        // Kích hoạt hiệu ứng cuộn (cấu hình nhẹ cho điện thoại)
         AOS.init({
-            duration: 800,
-            once: true, 
-            offset: 50 
+            duration: 800, // Thời gian chạy hiệu ứng ngắn lại cho nhanh
+            once: true, // Chỉ chạy 1 lần khi cuộn xuống
+            offset: 50 // Khoảng cách bắt đầu chạy
         });
 
         // Chữ chạy (Typewriter)
         new Typed('#typing-text', {
             strings: [
                 "Chúc chị tốt nghiệp vui vẻ! 🌹", 
-                "Ra trường là có việc ngay! 💼", 
-                "Nhớ bao em đi ăn nhé! 🍕"
+                "Sớm thành đại gia nhé! 💰", 
+                "Nhớ bao em đi ăn! 🍕"
             ],
             typeSpeed: 60,
             backSpeed: 40,
             loop: true,
-            showCursor: false 
+            showCursor: false // Ẩn con trỏ nhấp nháy cho gọn
         });
 
-        // Xử lý nhạc (iPhone cần bấm nút mới chạy)
+        // Xử lý nhạc (Quan trọng cho iPhone)
+        // iPhone KHÔNG cho tự phát nhạc, phải bấm nút mới chạy
         let music = document.getElementById("bg-music");
         let icon = document.getElementById("music-icon");
         let isPlaying = false;
@@ -303,13 +307,14 @@
             } else {
                 music.play();
                 icon.classList.remove('fa-music');
-                icon.classList.add('fa-spinner', 'spin-anim'); 
+                icon.classList.add('fa-spinner', 'spin-anim'); // Icon xoay xoay khi nhạc chạy
             }
             isPlaying = !isPlaying;
         }
 
         // Pháo hoa
         function fireworks() {
+            // Bắn nhẹ nhàng thôi cho đỡ lag máy cũ
             var count = 200;
             var defaults = {
                 origin: { y: 0.7 }
