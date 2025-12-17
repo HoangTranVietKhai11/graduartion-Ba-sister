@@ -2,187 +2,292 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <!-- Cấu hình chuẩn cho iPhone 6 Plus -->
+    <!-- Cấu hình chuẩn cho màn hình điện thoại (iPhone 6 Plus trở lên đều hiển thị tốt) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Chúc Mừng Tốt Nghiệp!</title>
+    <title>Chúc Mừng Chị Yêu Tốt Nghiệp!</title>
     
-    <!-- Font chữ đẹp & Icon -->
+    <!-- Font chữ dễ đọc -->
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Nunito:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Hiệu ứng chuyển động nhẹ (AOS) -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
     <style>
-        /* GIỮ NGUYÊN GIAO DIỆN NHẸ NHÀNG CHO IPHONE 6 PLUS */
         :root {
             --primary: #ff6b6b;
             --secondary: #4ecdc4;
             --accent: #ffe66d;
             --text-color: #ffffff;
         }
-        * { box-sizing: border-box; }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            margin: 0; padding: 0;
+            margin: 0;
+            padding: 0;
             font-family: 'Nunito', sans-serif;
-            background: #1a1a2e;
+            background: #1a1a2e; /* Màu nền tối sang trọng */
             color: var(--text-color);
             overflow-x: hidden;
-            -webkit-font-smoothing: antialiased;
+            -webkit-font-smoothing: antialiased; /* Giúp chữ mượt hơn trên iPhone */
         }
+
+        /* --- BACKGROUND (Gradient nhẹ) --- */
         .bg-gradient {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             z-index: -1;
         }
-        /* Nút nhạc */
+
+        /* --- NHẠC (Nút bấm to dễ ấn) --- */
         .music-btn {
-            position: fixed; bottom: 20px; left: 20px;
-            width: 50px; height: 50px;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(5px);
             border: 1px solid rgba(255,255,255,0.3);
             border-radius: 50%;
-            display: flex; justify-content: center; align-items: center;
-            cursor: pointer; z-index: 999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            z-index: 999;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .music-btn i { font-size: 22px; color: white; }
         .spin-anim { animation: spin 3s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* Header */
-        .container { width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; text-align: center; }
-        header { padding-top: 40px; margin-bottom: 40px; }
+        /* --- HEADER --- */
+        .container {
+            width: 100%;
+            max-width: 600px; /* Giới hạn chiều rộng để dễ đọc */
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header {
+            padding-top: 40px;
+            margin-bottom: 40px;
+        }
+
         .avatar-box {
-            width: 180px; height: 180px; margin: 0 auto 20px;
-            border-radius: 50%; border: 4px solid white; padding: 4px;
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            border: 4px solid white;
+            padding: 4px;
             background: rgba(255,255,255,0.1);
             box-shadow: 0 0 20px rgba(255, 107, 107, 0.4);
         }
-        .avatar-box img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
+
+        .avatar-box img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
         h1 {
-            font-family: 'Dancing Script', cursive; font-size: 3em; margin: 10px 0;
+            font-family: 'Dancing Script', cursive;
+            font-size: 3em; 
+            margin: 10px 0;
             background: linear-gradient(to right, #ff6b6b, #ffe66d);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             line-height: 1.2;
         }
-        .typing-box { font-size: 1.1em; color: #ddd; min-height: 40px; font-style: italic; }
 
-        /* Message Card */
+        .typing-box {
+            font-size: 1.1em;
+            color: #ddd;
+            min-height: 40px;
+            font-style: italic;
+        }
+
+        /* --- CARD LỜI CHÚC --- */
         .message-card {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px; padding: 30px 20px; margin-bottom: 40px;
-            text-align: justify; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-radius: 20px;
+            padding: 30px 20px;
+            margin-bottom: 40px;
+            text-align: justify;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
+
         .message-card h2 {
-            font-family: 'Dancing Script', cursive; color: var(--accent);
-            text-align: center; font-size: 2.2em; margin-top: 0;
+            font-family: 'Dancing Script', cursive;
+            color: var(--accent);
+            text-align: center;
+            font-size: 2.2em;
+            margin-top: 0;
         }
-        .message-card p { font-size: 1.1em; line-height: 1.6; }
 
-        /* Photos */
-        .photo-list { display: flex; flex-direction: column; gap: 25px; margin-bottom: 50px; }
+        .message-card p {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        /* --- ẢNH KỶ NIỆM --- */
+        .photo-list {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
         .photo-item {
-            background: white; padding: 10px 10px 40px 10px;
-            border-radius: 4px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            transform: rotate(-2deg); transition: transform 0.3s;
+            background: white;
+            padding: 10px 10px 40px 10px;
+            border-radius: 4px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: rotate(-2deg);
+            transition: transform 0.3s;
         }
+        
         .photo-item:nth-child(even) { transform: rotate(2deg); }
-        .photo-item img { width: 100%; height: auto; display: block; border-radius: 2px; }
-        .caption {
-            color: #333; font-family: 'Dancing Script', cursive;
-            font-size: 1.5em; margin-top: 10px; font-weight: bold; text-align: center;
+        .photo-item:active { transform: scale(0.98); }
+
+        .photo-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 2px;
         }
 
-        /* Button */
+        .caption {
+            color: #333;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5em;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* --- BUTTON --- */
         .btn-celebrate {
             background: linear-gradient(90deg, #ff6b6b, #e66767);
-            color: white; border: none; padding: 15px 40px;
-            font-size: 1.2em; border-radius: 50px; font-weight: bold;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            font-weight: bold;
             box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
-            cursor: pointer; margin-bottom: 50px; width: 100%;
+            cursor: pointer;
+            margin-bottom: 50px;
+            width: 100%;
         }
-        .btn-celebrate:active { transform: scale(0.95); }
+        
+        .btn-celebrate:active {
+            transform: scale(0.95);
+        }
+
     </style>
 </head>
 <body>
 
+    <!-- Nền -->
     <div class="bg-gradient"></div>
 
-    <!-- Nhạc nền -->
+    <!-- Nút Nhạc -->
     <div class="music-btn" onclick="toggleMusic()">
         <i class="fas fa-music" id="music-icon"></i>
     </div>
+    
     <audio id="bg-music" loop>
-        <!-- Bạn nhớ thay link nhạc nhé -->
         <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3" type="audio/mpeg">
     </audio>
 
     <div class="container">
         
+        <!-- Phần đầu: Avatar & Tên -->
         <header>
             <div class="avatar-box" data-aos="zoom-in">
-                <!-- Thay link ảnh chị bạn -->
-                <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?w=600" alt="Avatar">
+                <!-- Đường dẫn ảnh nội bộ của bạn -->
+                <img src="./img/img1.jpg" alt="Avatar">
             </div>
-            <h1 data-aos="fade-up">Chúc Mừng Tốt Nghiệp!</h1>
+            <h1 data-aos="fade-up">Chúc Mừng Chị Yêu!</h1>
             <div class="typing-box">
                 <span id="typing-text"></span>
             </div>
         </header>
 
-        <!-- Lời chúc dành cho Cao Đẳng -->
+        <!-- Phần Lời chúc (Đã sửa cho Cao Đẳng) -->
         <div class="message-card" data-aos="fade-up">
-            <h2>Thư Gửi Chị Yêu 💌</h2>
+            <h2>Thư Gửi Chị Baaa 💌</h2>
             <p>
                 "Hello Tân Cử Nhân Cao Đẳng! 🎓<br><br>
-                Vậy là 3 năm thanh xuân miệt mài đèn sách đã kết thúc rực rỡ. Chúc mừng chị đã cầm được tấm bằng xịn xò trên tay nhé!<br><br>
-                Học Cao đẳng là 'thực chiến', em chúc chị ra trường cái là <b>có việc làm ngay</b>, lương cao, sếp quý. Vững tay nghề, chắc tương lai nhé!<br><br>
-                Quan trọng nhất: Giàu rồi nhớ đừng quên bao đứa em này đi ăn nướng đấy! Mãi yêuuu! ❤️"
+                Chúc mừng chị đã chính thức hoàn thành chặng đường 3 năm đèn sách vất vả. Từ nay không còn cảnh chạy deadline thâu đêm nữa rồi nhaaaaa.<br><br>
+                Em chúc chị ra trường <b>có việc làm ngay</b>, công việc thuận lợi, lương cao và sớm thực hiện được ước mơ của mình.<br><br>
+                À mà quan trọng nhất: Giàu rồi thì nhớ bao đứa em ngoan ngoãn này đi ăn ngon nhé! <br><br>
+                <b>Mãi yêuuu! ❤️</b>"
             </p>
         </div>
 
-        <h2 style="font-family: 'Dancing Script'; font-size: 2.5em; margin-bottom: 30px;">Hành Trình Rực Rỡ</h2>
+        <!-- Phần Ảnh -->
+        <h2 style="font-family: 'Dancing Script'; font-size: 2.5em; margin-bottom: 30px;">Kỷ Niệm Đáng Nhớ</h2>
         <div class="photo-list">
             
             <div class="photo-item" data-aos="fade-right">
-                <img src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?w=500" alt="Photo 1">
-                <div class="caption">Ngày đầu nhập học</div>
+                <img src="./img/img2.jpg" alt="Photo 1">
+                <div class="caption">Ngày nhập học</div>
             </div>
 
             <div class="photo-item" data-aos="fade-left">
-                <img src="https://images.unsplash.com/photo-1627556704302-624286467c65?w=500" alt="Photo 2">
-                <div class="caption">Thanh xuân vườn trường</div>
+                <img src="./img/img3.jpg" alt="Photo 2">
+                <div class="caption">Thanh xuân rực rỡ</div>
             </div>
 
             <div class="photo-item" data-aos="fade-right">
-                <img src="https://images.unsplash.com/photo-1535982330050-f1c2fb627572?w=500" alt="Photo 3">
-                <div class="caption">Tốt nghiệp rồi!</div>
+                <img src="./img/img4.jpg" alt="Photo 3">
+                <div class="caption">Kỉ niệm cùng bạn thân</div>
             </div>
 
         </div>
 
+        <!-- Nút bấm -->
         <button class="btn-celebrate" onclick="fireworks()">
-            Bắn Pháo Hoa Nào! 🎆
+            Bắn Pháo Hoa Ăn Mừng! 🎆
         </button>
+
+        <p style="font-size: 0.8em; color: #aaa; margin-bottom: 20px;">Made with ❤️ by Khai Hoang </p>
 
     </div>
 
+    <!-- Script nhẹ nhàng -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
     <script>
-        AOS.init({ duration: 800, once: true, offset: 50 });
+        // Kích hoạt hiệu ứng cuộn
+        AOS.init({
+            duration: 800,
+            once: true, 
+            offset: 50 
+        });
 
-        // Sửa nội dung chạy chữ cho phù hợp
+        // Chữ chạy (Typewriter)
         new Typed('#typing-text', {
             strings: [
-                "Chúc chị ra trường có việc ngay! 💼", 
-                "Vững tay nghề, sáng tương lai! ✨", 
-                "Nhớ bao em đi ăn ngon nhé! 🍕"
+                "Chúc chị tốt nghiệp vui vẻ! 🌹", 
+                "Ra trường là có việc ngay! 💼", 
+                "Nhớ bao em đi ăn nhé! 🍕"
             ],
-            typeSpeed: 60, backSpeed: 40, loop: true, showCursor: false
+            typeSpeed: 60,
+            backSpeed: 40,
+            loop: true,
+            showCursor: false 
         });
 
         // Xử lý nhạc (iPhone cần bấm nút mới chạy)
@@ -198,19 +303,24 @@
             } else {
                 music.play();
                 icon.classList.remove('fa-music');
-                icon.classList.add('fa-spinner', 'spin-anim');
+                icon.classList.add('fa-spinner', 'spin-anim'); 
             }
             isPlaying = !isPlaying;
         }
 
+        // Pháo hoa
         function fireworks() {
             var count = 200;
-            var defaults = { origin: { y: 0.7 } };
+            var defaults = {
+                origin: { y: 0.7 }
+            };
+
             function fire(particleRatio, opts) {
                 confetti(Object.assign({}, defaults, opts, {
                     particleCount: Math.floor(count * particleRatio)
                 }));
             }
+
             fire(0.25, { spread: 26, startVelocity: 55 });
             fire(0.2, { spread: 60 });
             fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
