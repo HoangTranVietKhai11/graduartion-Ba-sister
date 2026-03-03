@@ -2,218 +2,303 @@
 
 ---
 
-## 1. Mô tả chung
+## 1. Chức năng này dùng để làm gì?
 
-Module **FE-02** là module quản lý toàn bộ hạ tầng sân cầu lông, bao gồm: thêm/sửa/xóa sân, phân loại sân, cấu hình giá động, xem sơ đồ mặt bằng thời gian thực, lập lịch bảo trì, xem lịch sử sử dụng, tìm kiếm sân và quản lý thiết bị tồn kho.
+Module **FE-02** là phần quản lý toàn bộ cơ sở vật chất của sân cầu lông. Cụ thể:
 
-Module này đóng vai trò **lõi vận hành** của hệ thống, kết nối trực tiếp với module đặt sân (FE-03), module thanh toán (FE-04) và module thông báo. Mọi thay đổi về trạng thái sân, lịch bảo trì hay giá đều ảnh hưởng tức thời đến trải nghiệm người dùng và khả năng đặt sân.
+- **Admin** có thể thêm, sửa, xóa sân; cấu hình giá thuê theo từng khung giờ; lên lịch bảo trì và xem báo cáo sử dụng sân.
+- **Nhân viên (Staff)** theo dõi trạng thái sân theo thời gian thực qua sơ đồ mặt bằng và kiểm soát thiết bị trong kho.
+- **Khách hàng (User)** tìm kiếm và xem sân phù hợp với ngày, giờ và loại sân mình muốn.
 
----
-
-## 2. Actor / Roles
-
-| Role | Mô tả | Quyền hạn |
-|---|---|---|
-| **Admin** | Quản trị viên hệ thống | Toàn quyền: thêm/sửa/xóa sân, cấu hình giá, lên lịch bảo trì, xem báo cáo |
-| **Staff (Nhân viên)** | Nhân viên quầy lễ tân / vận hành | Xem sơ đồ mặt bằng, quản lý tồn kho thiết bị, hỗ trợ tìm kiếm sân cho khách |
-| **User (Khách hàng)** | Người dùng cuối | Tìm kiếm và xem thông tin sân, không can thiệp được vào cấu hình hệ thống |
+Nếu không có module này, hệ thống không biết có bao nhiêu sân, sân nào đang bận, giá là bao nhiêu, kho còn thiết bị gì — tức là toàn bộ hoạt động vận hành sẽ bị tê liệt.
 
 ---
 
-## 3. Purpose (Mục tiêu)
+## 2. Actor / Roles (Đối tượng sử dụng)
 
-| Mục tiêu | Chi tiết |
-|---|---|
-| **Quản lý tập trung** | Tất cả thông tin sân (tên, loại, giá, trạng thái, ảnh) được quản lý tại một nơi duy nhất |
-| **Giá động linh hoạt** | Hỗ trợ nhiều mức giá (giờ thấp điểm, giờ cao điểm, giờ vàng) và bật/tắt Giờ Vàng theo từng giai đoạn |
-| **Minh bạch vận hành** | Sơ đồ mặt bằng real-time giúp nhân viên biết sân nào đang dùng, đang bảo trì hay sẵn sàng |
-| **Bảo trì chủ động** | Lên lịch bảo trì trước, tự động cảnh báo các booking bị ảnh hưởng để sắp xếp lại |
-| **Kiểm soát tồn kho** | Theo dõi thiết bị theo từng vị trí, cảnh báo khi số lượng dưới ngưỡng tối thiểu |
-| **Phân tích kinh doanh** | Lịch sử sử dụng sân giúp Admin nhận diện sân phổ biến, giờ cao điểm và doanh thu |
+### 👤 Admin (Quản trị viên)
+- Người duy nhất có quyền **tạo và xóa sân**.
+- Người duy nhất có quyền **định giá** cho các khung giờ.
+- Người duy nhất có quyền **lên lịch bảo trì** và xem toàn bộ **lịch sử sử dụng sân**.
 
----
+### 👔 Staff (Nhân viên vận hành)
+- Xem **sơ đồ mặt bằng** để biết sân nào đang trống / đang dùng / đang bảo trì.
+- Quản lý **kho thiết bị** (vợt, cầu, lưới, đèn, ...) và báo cáo hư hỏng.
+- Hỗ trợ khách tìm kiếm sân nhưng **không được** thêm/xóa/sửa thông tin sân.
 
-## 4. Interface (Giao diện)
-
-### 4.1 Admin — Courts List (`/admin/courts`)
-- Bảng danh sách sân với cột: Tên sân, Loại, Trạng thái, Giá/giờ, Hành động
-- Nút **Thêm sân** → mở Modal nhập tên, vị trí, loại, tiện ích, ảnh
-- Nút **Sửa** → mở Modal chỉnh sửa các trường tương ứng
-- Nút **Xóa** → xác nhận xóa sân (disabled nếu sân đang có booking active)
-- Badge trạng thái màu: `Xanh = Sẵn sàng`, `Vàng = Đang dùng`, `Đỏ = Bảo trì`, `Xám = Đóng cửa`
-
-### 4.2 Admin — Pricing (`/admin/courts/pricing`)
-- Ma trận giờ × mức giá (17 khung giờ từ 06:00 đến 23:00)
-- Toggle bật/tắt **Giờ Vàng** → tự động nhân giá +10% tất cả khung giờ
-- Chỉnh trực tiếp giá từng tier (Thấp điểm / Cao điểm / Giờ VIP)
-- Preview bảng tóm tắt giá sau khi chỉnh
-
-### 4.3 Admin — Floor Plan (`/admin/courts/floor-plan`)
-- Lưới sân hình chữ nhật, màu phân biệt theo trạng thái
-- Click vào sân → Modal hiển thị thông tin booking hiện tại (khách hàng, giờ, SĐT)
-- Dropdown đổi trạng thái sân trực tiếp từ Modal
-- Refresh tự động mỗi 30 giây (giả lập real-time)
-
-### 4.4 Admin — Maintenance (`/admin/courts/maintenance`)
-- Danh sách lịch bảo trì với cột: Sân, Ngày, Giờ, Kỹ thuật viên, Chi phí, Trạng thái
-- Nút **Thêm lịch** → Form chọn sân, ngày, giờ bắt đầu, thời lượng, ghi chú
-- Nếu có booking bị trùng → hiển thị Alert cảnh báo danh sách booking bị ảnh hưởng
-- Bộ lọc theo Sân / Trạng thái bảo trì
-
-### 4.5 Admin — Court Usage History (`/admin/courts/history`)
-- Bảng lịch sử sử dụng có phân trang
-- Bộ lọc: Sân, Khoảng ngày, Loại sân
-- Thẻ thống kê tổng hợp: Tổng lượt, Tổng doanh thu, Thời lượng TB, Sân phổ biến nhất
-- Biểu đồ cột (BarChart) doanh thu theo từng sân
-
-### 4.6 Staff — Equipment Inventory (`/staff/equipment`)
-- Bảng thiết bị với Badge trạng thái: `Đủ hàng`, `Sắp hết`, `Hết hàng`
-- Banner Danger nổi bật khi có mục hết hàng hoàn toàn
-- Nút Sửa nhanh số lượng tồn kho ngay trong bảng
-- Form Báo hỏng → ghi nhận số lượng thiết bị hư hỏng và tự trừ kho
-
-### 4.7 User — Dashboard (`/user/dashboard`)
-- Form tìm kiếm sân nâng cao: ngày, khung giờ, loại sân
-- Kết quả hiển thị dạng thẻ với giá, tiện ích, trạng thái
-- Nút **Đặt ngay** chuyển đến quy trình đặt sân (FE-03)
+### 🙋 User (Khách hàng)
+- Tìm kiếm sân theo ngày, giờ, loại.
+- Xem thông tin và giá sân trước khi đặt.
+- **Không thao tác** được với hệ thống quản lý phía sau.
 
 ---
 
-## 5. Data Processing (Xử lý dữ liệu)
+## 3. Purpose (Mục đích)
 
-| Thao tác | Luồng xử lý |
-|---|---|
-| Thêm sân | Nhập dữ liệu → Validate trùng tên → Lưu vào DB → Cập nhật danh sách sân và sơ đồ mặt bằng |
-| Cấu hình giá | Admin thay đổi tier/toggle → Hệ thống tính lại toàn bộ priceMatrix → Lưu → Áp dụng ngay cho booking mới |
-| Lên lịch bảo trì | Admin chọn sân + thời gian → Kiểm tra trùng booking → Cảnh báo nếu có → Lưu → Đổi trạng thái sân → Gửi thông báo cho khách bị ảnh hưởng |
-| Cập nhật tồn kho | Staff nhập số lượng điều chỉnh → Kiểm tra >= 0 → Cập nhật → So sánh với minQuantity → Kích hoạt cảnh báo nếu cần |
-| Xem lịch sử | Lấy UsageRecord theo bộ lọc → Tính tổng hợp (session count, revenue) → Render bảng và biểu đồ |
+Module FE-02 được xây dựng nhằm giải quyết 6 vấn đề chính:
+
+1. **Quản lý tập trung:** Thay vì dùng Excel hay sổ tay, tất cả thông tin sân (tên, loại, giá, trạng thái, ảnh) đều nằm trong một hệ thống duy nhất.
+
+2. **Giá linh hoạt theo giờ:** Sân cầu lông thường có giá khác nhau vào buổi sáng sớm, giờ cao điểm chiều tối và các giờ đặc biệt. Module cho phép cấu hình điều này dễ dàng.
+
+3. **Nhân viên không cần chạy ra sân để kiểm tra:** Sơ đồ mặt bằng real-time hiển thị đúng sân nào đang dùng, đang bảo trì hay còn trống — nhân viên tại quầy lễ tân thấy được ngay trên màn hình.
+
+4. **Bảo trì chủ động, không gây bất ngờ:** Khi lên lịch bảo trì, hệ thống tự kiểm tra xem có booking nào bị trùng không và hiển thị cảnh báo để Admin/Staff xử lý kịp thời.
+
+5. **Kiểm soát thiết bị:** Nhân viên biết ngay khi nào cần nhập thêm cầu lông, vợt hay đèn thay thế mà không cần đi kiểm tra kho thủ công.
+
+6. **Phân tích kinh doanh:** Admin thấy được sân nào được đặt nhiều nhất, giờ nào doanh thu cao nhất để có chiến lược kinh doanh tốt hơn.
 
 ---
 
-## 6. Function Detail (Chi tiết chức năng)
+## 4. Interface (Mô tả giao diện từng trang)
 
-### FE-02.1 — Thêm / Sửa Sân
-- Validate tên sân không trùng với sân hiện có (case-insensitive)
-- Bắt buộc: Tên, Loại sân, Giá/giờ
-- Tùy chọn: Mô tả, Văn phòng/Vị trí, Danh sách tiện ích (checkbox)
-- Sau khi lưu thành công: đóng Modal, cập nhật bảng, hiện Toast thành công
+### 📋 Trang Admin: Danh sách sân (`/admin/courts`)
+
+**Hiển thị:** Bảng danh sách tất cả sân với các cột: Tên sân, Loại sân, Trạng thái, Giá/giờ, Hành động.
+
+**Thao tác được:**
+- Nhấn nút **"Thêm sân"** → mở hộp thoại để điền thông tin sân mới.
+- Nhấn nút **"Sửa"** trên từng hàng → mở hộp thoại để chỉnh sửa.
+- Nhấn nút **"Xóa"** → hệ thống hỏi xác nhận trước khi xóa.
+
+**Màu sắc trạng thái:** Xanh lá = Sẵn sàng | Xanh dương = Đang sử dụng | Đỏ = Đang bảo trì | Xám = Đóng cửa.
+
+---
+
+### 💰 Trang Admin: Cấu hình Giá (`/admin/courts/pricing`)
+
+**Hiển thị:** Ma trận hiển thị 17 khung giờ trong ngày (từ 06:00 đến 23:00), mỗi ô được tô màu theo mức giá.
+
+**Thao tác được:**
+- Chỉnh sửa giá cho từng mức: Thấp điểm / Cao điểm / Giờ VIP.
+- Bật/tắt **Giờ Vàng** (toggle) → toàn bộ giá tự động tăng thêm 10%.
+
+**Lưu ý:** Giá mới chỉ áp dụng cho booking tạo sau thời điểm thay đổi. Booking cũ giữ nguyên giá.
+
+---
+
+### 🗺️ Trang Admin/Staff: Sơ đồ mặt bằng (`/admin/courts/floor-plan`)
+
+**Hiển thị:** Lưới ô vuông đại diện cho từng sân, màu ô tương ứng với trạng thái sân.
+
+**Thao tác được:**
+- Click vào ô sân → mở hộp thoại hiển thị: khách đang đặt là ai, số điện thoại, giờ bắt đầu/kết thúc.
+- Đổi trạng thái sân trực tiếp từ hộp thoại (ví dụ: từ "Sẵn sàng" sang "Bảo trì").
+
+---
+
+### 🔧 Trang Admin: Lịch bảo trì (`/admin/courts/maintenance`)
+
+**Hiển thị:** Danh sách lịch bảo trì với thông tin sân, ngày, giờ, kỹ thuật viên phụ trách, chi phí dự kiến.
+
+**Thao tác được:**
+- Thêm lịch bảo trì mới bằng cách điền vào form.
+- Nếu khung giờ bảo trì trùng với booking đã có → **hệ thống cảnh báo rõ ràng** danh sách khách hàng bị ảnh hưởng.
+
+---
+
+### 📊 Trang Admin: Lịch sử sử dụng sân (`/admin/courts/history`)
+
+**Hiển thị:** Bảng danh sách các lượt đặt sân đã hoàn thành, kèm thống kê tổng hợp và biểu đồ doanh thu theo sân.
+
+**Thao tác được:**
+- Lọc theo sân cụ thể, khoảng thời gian, hoặc loại sân.
+
+---
+
+### 📦 Trang Staff: Quản lý thiết bị (`/staff/equipment`)
+
+**Hiển thị:** Bảng các loại thiết bị trong kho: tên, số lượng hiện tại, ngưỡng tối thiểu, vị trí lưu trữ, nhà cung cấp.
+
+**Trạng thái cảnh báo:**
+- `Đủ hàng` (xanh): Số lượng trên ngưỡng tối thiểu.
+- `Sắp hết` (vàng): Số lượng thấp hơn ngưỡng tối thiểu.
+- `Hết hàng` (đỏ): Số lượng = 0 → Banner đỏ nổi bật xuất hiện ở đầu trang.
+
+**Thao tác được:**
+- Chỉnh số lượng tồn kho trực tiếp trên bảng.
+- Mở form báo hỏng → ghi số lượng hư hỏng → hệ thống tự trừ vào kho.
+
+---
+
+### 🔍 Trang User: Tìm kiếm sân (`/user/dashboard`)
+
+**Hiển thị:** Form tìm kiếm với 3 ô lọc: Ngày, Khung giờ, Loại sân. Sau khi tìm → hiển thị thẻ sân phù hợp có đủ thông tin.
+
+**Thao tác được:**
+- Nhấn **"Đặt ngay"** trên thẻ sân → chuyển sang quy trình đặt sân (FE-03).
+
+---
+
+## 5. Data Processing (Luồng xử lý dữ liệu)
+
+Phần này mô tả hệ thống làm gì "bên trong" khi người dùng thực hiện hành động:
+
+**Khi Admin thêm sân:**
+> Người dùng điền form → Hệ thống kiểm tra tên có trùng không → Nếu không trùng: lưu vào cơ sở dữ liệu, cập nhật danh sách, cập nhật sơ đồ mặt bằng → Hiện thông báo "Thêm thành công".
+
+**Khi Admin thay đổi giá:**
+> Admin chỉnh giá hoặc bật/tắt Giờ Vàng → Hệ thống tính lại toàn bộ bảng giá theo giờ → Lưu vào cơ sở dữ liệu → Áp dụng ngay cho mọi booking mới từ thời điểm đó.
+
+**Khi Admin tạo lịch bảo trì:**
+> Admin chọn sân + ngày + giờ → Hệ thống kiểm tra xem có booking nào bị trùng không → Nếu có: hiển thị danh sách cảnh báo → Admin xác nhận → Lưu lịch bảo trì → Sân tự đổi sang trạng thái "Bảo trì".
+
+**Khi Staff cập nhật tồn kho:**
+> Staff nhập số lượng mới → Hệ thống kiểm tra số lượng >= 0 → Lưu → So sánh với ngưỡng tối thiểu → Hiển thị/tắt cảnh báo tương ứng.
+
+**Khi User tìm kiếm sân:**
+> User điền ngày + giờ + loại sân → Hệ thống lọc các sân đang ở trạng thái "Sẵn sàng" trong khung giờ đó → Trả về danh sách kết quả sắp xếp theo giá tăng dần.
+
+---
+
+## 6. Function Detail (Chi tiết từng chức năng)
+
+### FE-02.1 — Thêm / Sửa thông tin sân
+- Form có các trường: Tên sân *(bắt buộc)*, Loại sân *(bắt buộc)*, Giá/giờ *(bắt buộc)*, Mô tả, Vị trí, Danh sách tiện ích.
+- Hệ thống so sánh tên mới với toàn bộ sân hiện có (không phân biệt chữ hoa/thường). Nếu trùng → báo lỗi và không lưu.
+- Sau khi lưu thành công: hộp thoại tự đóng, bảng danh sách cập nhật ngay.
 
 ### FE-02.2 — Upload ảnh sân
-- Cho phép upload tối đa 5 ảnh/sân (JPG, PNG, WebP)
-- Preview ảnh trước khi lưu
-- Hiển thị ảnh đầu tiên làm thumbnail trong danh sách
+- Cho phép upload tối đa 5 ảnh, mỗi ảnh tối đa 5MB, chỉ chấp nhận định dạng JPG, PNG, WebP.
+- Ảnh được xem trước ngay sau khi chọn file.
+- Ảnh đầu tiên sẽ được dùng làm ảnh đại diện (thumbnail) trong danh sách.
 
 ### FE-02.3 — Phân loại sân
-- Loại sân: `Standard` | `VIP` | `Double` (Sân đôi)
-- Badge màu khác nhau cho từng loại trong bảng và sơ đồ
-- Giá VIP mặc định nhân 1.5× giá Standard
+- 3 loại: **Standard** (sân thường), **VIP** (sân cao cấp), **Double** (sân đôi).
+- Mỗi loại có màu badge riêng để dễ nhận diện trong danh sách và sơ đồ.
 
 ### FE-02.4 — Cấu hình giá động
-- 3 mức giá: Thấp điểm (06-09h, 14-17h), Cao điểm (17-21h), Giờ VIP (09-14h, 21-23h)
-- Toggle Giờ Vàng áp dụng thêm +10% toàn bộ khung giờ
-- Admin có thể chỉnh tay từng mức giá; hệ thống tự cập nhật priceMatrix
+- 3 mức giá:
+  - **Thấp điểm** (06:00–09:00 và 14:00–17:00): giá rẻ nhất.
+  - **Cao điểm** (17:00–21:00): giá trung bình.
+  - **Giờ VIP** (09:00–14:00 và 21:00–23:00): giá cao nhất.
+- **Toggle Giờ Vàng:** bật lên → tất cả mức giá tăng thêm 10%.
 
 ### FE-02.5 — Sơ đồ mặt bằng real-time
-- Hiển thị tất cả sân trên lưới 2D
-- Màu: `Xanh = available`, `Xanh dương = in_use`, `Đỏ = maintenance`, `Xám = closed`
-- Click sân → Modal: thông tin booking, SĐT khách, giờ bắt đầu/kết thúc
-- Cho phép đổi trạng thái sân trực tiếp từ Modal (Admin/Staff)
+- Refresh dữ liệu tự động mỗi 30 giây để giữ thông tin luôn cập nhật.
+- Click ô sân → xem thông tin booking và đổi trạng thái sân nếu cần.
 
 ### FE-02.6 — Lịch bảo trì
-- Tạo lịch bảo trì: chọn sân, ngày, giờ, thời lượng, kỹ thuật viên, ước tính chi phí
-- Auto-detect booking trùng giờ → hiển thị danh sách cụ thể
-- Sau khi lưu: sân tự chuyển sang trạng thái `maintenance`
-- Khi hoàn thành: sân tự chuyển về `available`
+- Trước khi lưu: hệ thống kiểm tra toàn bộ booking trong khoảng thời gian bảo trì.
+- Nếu phát hiện booking trùng → hiện danh sách chi tiết (tên khách, giờ đặt, SĐT).
+- Sau khi lưu: sân tự chuyển sang `maintenance`. Khi đánh dấu hoàn thành: sân tự chuyển về `available`.
 
-### FE-02.7 — Tìm kiếm sân nâng cao (User/Staff)
-- Bộ lọc: Ngày, Khung giờ, Loại sân, Từ khóa
-- Kết quả chỉ hiển thị sân `available` trong khung giờ đã chọn
-- Sắp xếp theo giá tăng dần mặc định
-
-### FE-02.8 — Sơ đồ mặt bằng real-time (xem bên trên FE-02.5)
+### FE-02.7 — Tìm kiếm sân nâng cao
+- Chỉ trả về sân `available` trong khung giờ đã chọn — không hiển thị sân bảo trì hoặc đã có người đặt.
+- Nếu không có sân phù hợp → hiện thông báo thay vì để trang trống.
 
 ### FE-02.9 — Lịch sử sử dụng sân
-- Phân trang 10 bản ghi/trang
-- Xuất dữ liệu (chuẩn bị cho kết nối API)
-- Thống kê: Tổng lượt dùng, Doanh thu, Thời lượng TB, Sân hot nhất, Giờ hot nhất
+- Thống kê tự tính: Tổng số lượt đặt, Tổng doanh thu, Thời lượng trung bình, Sân được đặt nhiều nhất, Khung giờ hot nhất.
+- Có biểu đồ cột thể hiện doanh thu theo từng sân.
 
-### FE-02.10 — Quản lý tồn kho thiết bị (Staff)
-- Cảnh báo tự động khi `quantity < minQuantity`
-- Banner Danger nổi bật khi `quantity === 0`
-- Sửa nhanh số lượng tồn kho trực tiếp trên bảng
-- Form báo hỏng: nhập số lượng hỏng → tự trừ vào kho
+### FE-02.10 — Quản lý thiết bị tồn kho
+- Cảnh báo tự động so sánh `quantity` với `minQuantity` sau mỗi lần cập nhật.
+- Khi `quantity = 0`: banner đỏ xuất hiện ở đầu trang, không thể bỏ qua.
 
 ---
 
-## 7. Validation (Kiểm tra đầu vào)
+## 7. Validation (Kiểm tra dữ liệu đầu vào)
 
-| Trường | Quy tắc |
+Trước khi lưu bất kỳ thông tin nào, hệ thống kiểm tra:
+
+| Trường dữ liệu | Điều kiện hợp lệ |
 |---|---|
-| Tên sân | Bắt buộc, tối đa 100 ký tự, không trùng tên sân đã có |
-| Loại sân | Bắt buộc, chỉ chấp nhận: Standard / VIP / Double |
-| Giá/giờ | Bắt buộc, số dương, tối thiểu 10.000 VNĐ |
-| Ảnh sân | JPG / PNG / WebP, tối đa 5MB/ảnh, tối đa 5 ảnh |
-| Ngày bảo trì | Phải >= ngày hiện tại |
-| Thời lượng bảo trì | Tối thiểu 1 giờ, tối đa 24 giờ |
-| Số lượng tồn kho | Không âm (>= 0) |
-| Ngày tìm kiếm | Phải >= ngày hiện tại |
+| Tên sân | Không để trống, tối đa 100 ký tự, không trùng tên sân đã có |
+| Loại sân | Phải chọn một trong: Standard / VIP / Double |
+| Giá/giờ | Số nguyên dương, tối thiểu 10.000 VNĐ |
+| Ảnh upload | JPG / PNG / WebP, tối đa 5MB/ảnh, tối đa 5 ảnh |
+| Ngày bảo trì | Phải từ ngày hôm nay trở đi |
+| Thời lượng bảo trì | Từ 1 đến 24 giờ |
+| Số lượng tồn kho | Không được âm (>= 0) |
+| Ngày tìm kiếm sân | Phải từ ngày hôm nay trở đi |
 
 ---
 
 ## 8. Business Rules (Quy tắc nghiệp vụ)
 
-1. **Không xóa sân có booking active:** Sân đang có booking chưa hoàn thành không được phép xóa.
-2. **Bảo trì ưu tiên hơn booking:** Khi tạo lịch bảo trì trùng giờ, hệ thống cảnh báo nhưng vẫn cho phép tạo; Admin/Staff phải liên hệ khách để hủy booking thủ công.
-3. **Giá áp dụng ngay:** Mọi thay đổi cấu hình giá có hiệu lực với **booking mới**; booking đã xác nhận trước đó không bị thay đổi giá.
-4. **Toggle Giờ Vàng là toàn cục:** Bật/tắt Giờ Vàng áp dụng cho **tất cả sân**, không thể cấu hình riêng từng sân.
-5. **Sân bảo trì không thể đặt:** Sân ở trạng thái `maintenance` hoặc `closed` không xuất hiện trong kết quả tìm kiếm của User.
-6. **Tồn kho âm bị ngăn chặn:** Hệ thống không cho phép lưu số lượng kho âm dù Admin/Staff nhập tay.
-7. **Phân quyền rõ ràng:** User không thể truy cập trang Cấu hình giá, Bảo trì, hay Sơ đồ mặt bằng đầy đủ; Staff không thể xóa hoặc tạo sân mới.
+Đây là những quy tắc không thể bỏ qua, được áp dụng xuyên suốt module:
+
+1. **Không được xóa sân đang có booking:** Nếu sân vẫn còn lịch đặt chưa hoàn thành, nút "Xóa" sẽ bị vô hiệu hóa và có giải thích lý do.
+
+2. **Thay đổi giá không ảnh hưởng booking cũ:** Booking đã được xác nhận trước đó luôn giữ mức giá tại thời điểm đặt. Chỉ booking mới mới áp dụng giá mới.
+
+3. **Bảo trì có thể ghi đè booking (nhưng phải xác nhận):** Hệ thống cảnh báo nhưng không ngăn cản. Admin vẫn có thể tạo bảo trì trong giờ đã có booking — nhưng phải tự liên hệ khách để sắp xếp lại.
+
+4. **Giờ Vàng áp dụng cho tất cả sân:** Không thể bật Giờ Vàng riêng cho một sân. Khi bật, mọi sân đều tăng giá 10%.
+
+5. **Sân bảo trì / đóng cửa không xuất hiện trong kết quả tìm kiếm của User.**
+
+6. **Số lượng tồn kho không thể âm:** Dù Admin hay Staff nhập thủ công, giá trị -1 hay số âm bất kỳ sẽ bị từ chối.
+
+7. **User không thể truy cập trang Admin/Staff:** Hệ thống chặn theo role, chuyển hướng về trang phù hợp nếu truy cập sai quyền.
 
 ---
 
-## 9. Functionalities (Danh sách chức năng)
+## 9. Functionalities (Tổng hợp chức năng)
 
-| Mã | Tên chức năng | Dành cho |
+| Mã chức năng | Tên | Ai dùng |
 |---|---|---|
-| FE-02.1 | Thêm / Sửa sân với kiểm tra trùng tên | Admin |
-| FE-02.2 | Upload và quản lý ảnh sân | Admin |
-| FE-02.3 | Phân loại sân (VIP / Standard / Double) | Admin |
-| FE-02.4 | Cấu hình giá động và Giờ Vàng | Admin |
-| FE-02.5 | Xem sơ đồ mặt bằng real-time + đổi trạng thái | Admin / Staff |
-| FE-02.6 | Quản lý lịch bảo trì + cảnh báo booking bị ảnh hưởng | Admin |
-| FE-02.7 | Tìm kiếm sân nâng cao (theo ngày, giờ, loại) | User / Staff |
+| FE-02.1 | Thêm / Sửa sân, kiểm tra trùng tên | Admin |
+| FE-02.2 | Upload ảnh sân | Admin |
+| FE-02.3 | Phân loại sân (Standard / VIP / Double) | Admin |
+| FE-02.4 | Cấu hình giá động + Giờ Vàng | Admin |
+| FE-02.5 | Sơ đồ mặt bằng + đổi trạng thái sân | Admin, Staff |
+| FE-02.6 | Tạo / xem lịch bảo trì, cảnh báo booking trùng | Admin |
+| FE-02.7 | Tìm kiếm sân nâng cao theo ngày/giờ/loại | User, Staff |
 | FE-02.8 | Sơ đồ mặt bằng xem nhanh (Staff) | Staff |
-| FE-02.9 | Xem lịch sử sử dụng sân + thống kê | Admin |
+| FE-02.9 | Lịch sử sử dụng sân + thống kê + biểu đồ | Admin |
 | FE-02.10 | Quản lý thiết bị tồn kho + cảnh báo sắp hết | Staff |
 
 ---
 
-## 10. Normal Cases (Trường hợp thông thường)
+## 10. Normal Cases (Trường hợp thông thường — hệ thống hoạt động đúng)
 
-| Trường hợp | Kết quả mong đợi |
-|---|---|
-| Admin thêm sân với tên chưa tồn tại | Sân được lưu thành công, xuất hiện trong danh sách và sơ đồ mặt bằng |
-| Admin bật Giờ Vàng | Toàn bộ priceMatrix cập nhật ngay, các booking mới áp dụng giá mới |
-| Admin tạo lịch bảo trì cho sân trống lịch | Lịch được lưu, sân chuyển trạng thái `maintenance`, không có cảnh báo booking |
-| Staff cập nhật tồn kho tăng lên | Số lượng được lưu, nếu vượt minQuantity thì Alert cảnh báo biến mất |
-| User tìm kiếm sân vào ngày/giờ còn trống | Hiển thị danh sách sân available, có thể bấm Đặt ngay |
-| Admin xem lịch sử theo bộ lọc | Hiển thị đúng bản ghi khớp điều kiện lọc, thống kê cập nhật theo kết quả |
+**Trường hợp 1:** Admin thêm sân "Sân 9" chưa tồn tại trong hệ thống.
+> ✅ Hệ thống lưu thành công, "Sân 9" xuất hiện trong bảng danh sách và sơ đồ mặt bằng ngay lập tức.
+
+**Trường hợp 2:** Admin bật Giờ Vàng lúc 15:00.
+> ✅ Toàn bộ mức giá tăng 10%. Các khách đặt sân từ 15:00 trở đi sẽ thấy giá mới. Khách đặt trước đó không bị ảnh hưởng.
+
+**Trường hợp 3:** Admin tạo lịch bảo trì cho "Sân 3" vào ngày mai, khoảng thời gian này không có ai đặt.
+> ✅ Lịch bảo trì được tạo ngay, "Sân 3" chuyển sang trạng thái đỏ trên sơ đồ mặt bằng. Không có cảnh báo nào.
+
+**Trường hợp 4:** Staff nhập lại số lượng cầu lông từ 3 lên 15 hộp (ngưỡng tối thiểu là 10).
+> ✅ Số lượng được cập nhật, badge chuyển từ "Sắp hết" sang "Đủ hàng", không còn cảnh báo.
+
+**Trường hợp 5:** User tìm sân vào thứ 7 khung giờ 17:00–18:00, loại Standard.
+> ✅ Hệ thống trả về danh sách các sân Standard còn trống trong khung giờ đó, sắp xếp theo giá.
 
 ---
 
-## 11. Abnormal Cases (Trường hợp bất thường)
+## 11. Abnormal Cases (Trường hợp bất thường — hệ thống xử lý khi có vấn đề)
 
-| Trường hợp | Xử lý hệ thống |
-|---|---|
-| Admin thêm sân với tên đã tồn tại | Hiển thị thông báo lỗi "Tên sân đã tồn tại", không lưu, giữ nguyên form |
-| Admin xóa sân đang có booking active | Nút Xóa bị disabled, tooltip giải thích lý do |
-| Admin tạo bảo trì trùng lịch booking | Hiển thị Alert cảnh báo danh sách booking bị ảnh hưởng, vẫn cho phép lưu sau khi xác nhận |
-| Staff nhập tồn kho âm | Validation ngăn lưu, hiển thị "Số lượng không được nhỏ hơn 0" |
-| User tìm kiếm sân vào ngày/giờ không có sân nào | Hiển thị thông báo "Không tìm thấy sân phù hợp" |
-| Mất kết nối API khi tải sơ đồ mặt bằng | Hiển thị Skeleton loading + thông báo "Không thể tải dữ liệu. Thử lại sau." |
-| Upload ảnh vượt quá 5MB | Thông báo lỗi "Ảnh quá lớn (tối đa 5MB)", không thêm vào danh sách |
-| Upload ảnh sai định dạng | Thông báo "Chỉ hỗ trợ JPG, PNG, WebP" |
-| Giá nhập vào là 0 hoặc âm | Validation trường giá, ngăn lưu và hiển thị "Giá phải lớn hơn 0" |
-| Ngày bảo trì được chọn là ngày trong quá khứ | Date picker ngăn chọn, hoặc validate khi submit form |
+**Trường hợp 1:** Admin thêm sân tên "Sân 1" — tên đã tồn tại.
+> ❌ Hệ thống không lưu, hiện thông báo lỗi: *"Tên sân đã tồn tại. Vui lòng chọn tên khác."* Form vẫn giữ nguyên nội dung để Admin sửa.
+
+**Trường hợp 2:** Admin muốn xóa "Sân 2" đang có 3 booking chưa hoàn thành.
+> ❌ Nút "Xóa" bị vô hiệu hóa và hiện tooltip: *"Không thể xóa sân đang có booking chưa hoàn thành."*
+
+**Trường hợp 3:** Admin tạo lịch bảo trì "Sân 4" từ 17:00–19:00, nhưng trong giờ đó có 2 booking.
+> ⚠️ Hệ thống không tự động hủy booking mà hiện bảng cảnh báo: *"2 booking sẽ bị ảnh hưởng: [Nguyễn Văn A - 17:00, Trần Thị B - 18:00]."* Admin xác nhận → lịch bảo trì vẫn được tạo nhưng Admin phải tự liên hệ khách.
+
+**Trường hợp 4:** Staff nhập số lượng thiết bị là -5.
+> ❌ Hệ thống không lưu, hiện thông báo: *"Số lượng không được nhỏ hơn 0."*
+
+**Trường hợp 5:** User tìm kiếm sân vào ngày 01/01/2024 (đã qua).
+> ❌ Hệ thống không cho chọn ngày quá khứ trong date picker. Nếu nhập thủ công → hiện thông báo: *"Vui lòng chọn ngày từ hôm nay trở đi."*
+
+**Trường hợp 6:** User tìm kiếm sân vào thứ 7 khung giờ 17:00–18:00 nhưng tất cả sân đều đã có người đặt.
+> ⚠️ Không hiển thị lỗi đỏ, thay vào đó hiện thông báo thân thiện: *"Không tìm thấy sân trống trong khung giờ này. Hãy thử ngày hoặc giờ khác."*
+
+**Trường hợp 7:** Upload ảnh sân file .docx sai định dạng.
+> ❌ Hệ thống từ chối file, hiện thông báo: *"Chỉ hỗ trợ định dạng JPG, PNG, WebP."*
+
+**Trường hợp 8:** Upload ảnh sân file 8MB (quá giới hạn 5MB).
+> ❌ Hệ thống từ chối file, hiện thông báo: *"Ảnh quá lớn. Kích thước tối đa là 5MB."*
+
+**Trường hợp 9:** Mất kết nối internet khi đang tải sơ đồ mặt bằng.
+> ⚠️ Trang hiển thị skeleton loading (hiệu ứng chờ), sau 10 giây không có dữ liệu thì hiện thông báo: *"Không thể kết nối. Kiểm tra mạng và thử lại."*
+
+**Trường hợp 10:** Giá sân nhập là 0 hoặc số âm.
+> ❌ Hệ thống không lưu, hiện thông báo: *"Giá phải lớn hơn 0 VNĐ."*
