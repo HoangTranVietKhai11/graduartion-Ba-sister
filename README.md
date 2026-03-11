@@ -1,304 +1,218 @@
-# FE-02: Quản Lý Sân & Hạ Tầng — Đặc Tả Chức Năng
+# Kiểm thử Phần mềm - Hệ thống Đặt sân Cầu lông
 
----
-
-## 1. Chức năng này dùng để làm gì?
-
-Module **FE-02** là phần quản lý toàn bộ cơ sở vật chất của sân cầu lông. Cụ thể:
-
-- **Admin** có thể thêm, sửa, xóa sân; cấu hình giá thuê theo từng khung giờ; lên lịch bảo trì và xem báo cáo sử dụng sân.
-- **Nhân viên (Staff)** theo dõi trạng thái sân theo thời gian thực qua sơ đồ mặt bằng và kiểm soát thiết bị trong kho.
-- **Khách hàng (User)** tìm kiếm và xem sân phù hợp với ngày, giờ và loại sân mình muốn.
-
-Nếu không có module này, hệ thống không biết có bao nhiêu sân, sân nào đang bận, giá là bao nhiêu, kho còn thiết bị gì — tức là toàn bộ hoạt động vận hành sẽ bị tê liệt.
-
----
-
-## 2. Actor / Roles (Đối tượng sử dụng)
-
-### 👤 Admin (Quản trị viên)
-- Người duy nhất có quyền **tạo và xóa sân**.
-- Người duy nhất có quyền **định giá** cho các khung giờ.
-- Người duy nhất có quyền **lên lịch bảo trì** và xem toàn bộ **lịch sử sử dụng sân**.
-
-### 👔 Staff (Nhân viên vận hành)
-- Xem **sơ đồ mặt bằng** để biết sân nào đang trống / đang dùng / đang bảo trì.
-- Quản lý **kho thiết bị** (vợt, cầu, lưới, đèn, ...) và báo cáo hư hỏng.
-- Hỗ trợ khách tìm kiếm sân nhưng **không được** thêm/xóa/sửa thông tin sân.
-
-### 🙋 User (Khách hàng)
-- Tìm kiếm sân theo ngày, giờ, loại.
-- Xem thông tin và giá sân trước khi đặt.
-- **Không thao tác** được với hệ thống quản lý phía sau.
-
----
-
-## 3. Purpose (Mục đích)
-
-Module FE-02 được xây dựng nhằm giải quyết 6 vấn đề chính:
-
-1. **Quản lý tập trung:** Thay vì dùng Excel hay sổ tay, tất cả thông tin sân (tên, loại, giá, trạng thái, ảnh) đều nằm trong một hệ thống duy nhất.
-
-2. **Giá linh hoạt theo giờ:** Sân cầu lông thường có giá khác nhau vào buổi sáng sớm, giờ cao điểm chiều tối và các giờ đặc biệt. Module cho phép cấu hình điều này dễ dàng.
-
-3. **Nhân viên không cần chạy ra sân để kiểm tra:** Sơ đồ mặt bằng real-time hiển thị đúng sân nào đang dùng, đang bảo trì hay còn trống — nhân viên tại quầy lễ tân thấy được ngay trên màn hình.
-
-4. **Bảo trì chủ động, không gây bất ngờ:** Khi lên lịch bảo trì, hệ thống tự kiểm tra xem có booking nào bị trùng không và hiển thị cảnh báo để Admin/Staff xử lý kịp thời.
-
-5. **Kiểm soát thiết bị:** Nhân viên biết ngay khi nào cần nhập thêm cầu lông, vợt hay đèn thay thế mà không cần đi kiểm tra kho thủ công.
-
-6. **Phân tích kinh doanh:** Admin thấy được sân nào được đặt nhiều nhất, giờ nào doanh thu cao nhất để có chiến lược kinh doanh tốt hơn.
-
----
-
-## 4. Interface (Mô tả giao diện từng trang)
-
-### 📋 Trang Admin: Danh sách sân (`/admin/courts`)
-
-**Hiển thị:** Bảng danh sách tất cả sân với các cột: Tên sân, Loại sân, Trạng thái, Giá/giờ, Hành động.
-
-**Thao tác được:**
-- Nhấn nút **"Thêm sân"** → mở hộp thoại để điền thông tin sân mới.
-- Nhấn nút **"Sửa"** trên từng hàng → mở hộp thoại để chỉnh sửa.
-- Nhấn nút **"Xóa"** → hệ thống hỏi xác nhận trước khi xóa.
-
-**Màu sắc trạng thái:** Xanh lá = Sẵn sàng | Xanh dương = Đang sử dụng | Đỏ = Đang bảo trì | Xám = Đóng cửa.
-
----
-
-### 💰 Trang Admin: Cấu hình Giá (`/admin/courts/pricing`)
-
-**Hiển thị:** Ma trận hiển thị 17 khung giờ trong ngày (từ 06:00 đến 23:00), mỗi ô được tô màu theo mức giá.
-
-**Thao tác được:**
-- Chỉnh sửa giá cho từng mức: Thấp điểm / Cao điểm / Giờ VIP.
-- Bật/tắt **Giờ Vàng** (toggle) → toàn bộ giá tự động tăng thêm 10%.
-
-**Lưu ý:** Giá mới chỉ áp dụng cho booking tạo sau thời điểm thay đổi. Booking cũ giữ nguyên giá.
-
----
-
-### 🗺️ Trang Admin/Staff: Sơ đồ mặt bằng (`/admin/courts/floor-plan`)
-
-**Hiển thị:** Lưới ô vuông đại diện cho từng sân, màu ô tương ứng với trạng thái sân.
-
-**Thao tác được:**
-- Click vào ô sân → mở hộp thoại hiển thị: khách đang đặt là ai, số điện thoại, giờ bắt đầu/kết thúc.
-- Đổi trạng thái sân trực tiếp từ hộp thoại (ví dụ: từ "Sẵn sàng" sang "Bảo trì").
-
----
-
-### 🔧 Trang Admin: Lịch bảo trì (`/admin/courts/maintenance`)
-
-**Hiển thị:** Danh sách lịch bảo trì với thông tin sân, ngày, giờ, kỹ thuật viên phụ trách, chi phí dự kiến.
-
-**Thao tác được:**
-- Thêm lịch bảo trì mới bằng cách điền vào form.
-- Nếu khung giờ bảo trì trùng với booking đã có → **hệ thống cảnh báo rõ ràng** danh sách khách hàng bị ảnh hưởng.
-
----
-
-### 📊 Trang Admin: Lịch sử sử dụng sân (`/admin/courts/history`)
-
-**Hiển thị:** Bảng danh sách các lượt đặt sân đã hoàn thành, kèm thống kê tổng hợp và biểu đồ doanh thu theo sân.
-
-**Thao tác được:**
-- Lọc theo sân cụ thể, khoảng thời gian, hoặc loại sân.
-
----
-
-### 📦 Trang Staff: Quản lý thiết bị (`/staff/equipment`)
-
-**Hiển thị:** Bảng các loại thiết bị trong kho: tên, số lượng hiện tại, ngưỡng tối thiểu, vị trí lưu trữ, nhà cung cấp.
-
-**Trạng thái cảnh báo:**
-- `Đủ hàng` (xanh): Số lượng trên ngưỡng tối thiểu.
-- `Sắp hết` (vàng): Số lượng thấp hơn ngưỡng tối thiểu.
-- `Hết hàng` (đỏ): Số lượng = 0 → Banner đỏ nổi bật xuất hiện ở đầu trang.
-
-**Thao tác được:**
-- Chỉnh số lượng tồn kho trực tiếp trên bảng.
-- Mở form báo hỏng → ghi số lượng hư hỏng → hệ thống tự trừ vào kho.
-
----
-
-### 🔍 Trang User: Tìm kiếm sân (`/user/dashboard`)
-
-**Hiển thị:** Form tìm kiếm với 3 ô lọc: Ngày, Khung giờ, Loại sân. Sau khi tìm → hiển thị thẻ sân phù hợp có đủ thông tin.
-
-**Thao tác được:**
-- Nhấn **"Đặt ngay"** trên thẻ sân → chuyển sang quy trình đặt sân (FE-03).
-
----
-
-## 5. Data Processing (Luồng xử lý dữ liệu)
-
-Phần này mô tả hệ thống làm gì "bên trong" khi người dùng thực hiện hành động:
-
-**Khi Admin thêm sân:**
-> Người dùng điền form → Hệ thống kiểm tra tên có trùng không → Nếu không trùng: lưu vào cơ sở dữ liệu, cập nhật danh sách, cập nhật sơ đồ mặt bằng → Hiện thông báo "Thêm thành công".
-
-**Khi Admin thay đổi giá:**
-> Admin chỉnh giá hoặc bật/tắt Giờ Vàng → Hệ thống tính lại toàn bộ bảng giá theo giờ → Lưu vào cơ sở dữ liệu → Áp dụng ngay cho mọi booking mới từ thời điểm đó.
-
-**Khi Admin tạo lịch bảo trì:**
-> Admin chọn sân + ngày + giờ → Hệ thống kiểm tra xem có booking nào bị trùng không → Nếu có: hiển thị danh sách cảnh báo → Admin xác nhận → Lưu lịch bảo trì → Sân tự đổi sang trạng thái "Bảo trì".
-
-**Khi Staff cập nhật tồn kho:**
-> Staff nhập số lượng mới → Hệ thống kiểm tra số lượng >= 0 → Lưu → So sánh với ngưỡng tối thiểu → Hiển thị/tắt cảnh báo tương ứng.
-
-**Khi User tìm kiếm sân:**
-> User điền ngày + giờ + loại sân → Hệ thống lọc các sân đang ở trạng thái "Sẵn sàng" trong khung giờ đó → Trả về danh sách kết quả sắp xếp theo giá tăng dần.
-
----
-
-## 6. Function Detail (Chi tiết từng chức năng)
-
-### FE-02.1 — Thêm / Sửa thông tin sân
-- Form có các trường: Tên sân *(bắt buộc)*, Loại sân *(bắt buộc)*, Giá/giờ *(bắt buộc)*, Mô tả, Vị trí, Danh sách tiện ích.
-- Hệ thống so sánh tên mới với toàn bộ sân hiện có (không phân biệt chữ hoa/thường). Nếu trùng → báo lỗi và không lưu.
-- Sau khi lưu thành công: hộp thoại tự đóng, bảng danh sách cập nhật ngay.
-
-### FE-02.2 — Upload ảnh sân
-- Cho phép upload tối đa 5 ảnh, mỗi ảnh tối đa 5MB, chỉ chấp nhận định dạng JPG, PNG, WebP.
-- Ảnh được xem trước ngay sau khi chọn file.
-- Ảnh đầu tiên sẽ được dùng làm ảnh đại diện (thumbnail) trong danh sách.
-
-### FE-02.3 — Phân loại sân
-- 3 loại: **Standard** (sân thường), **VIP** (sân cao cấp), **Double** (sân đôi).
-- Mỗi loại có màu badge riêng để dễ nhận diện trong danh sách và sơ đồ.
-
-### FE-02.4 — Cấu hình giá động
-- 3 mức giá:
-  - **Thấp điểm** (06:00–09:00 và 14:00–17:00): giá rẻ nhất.
-  - **Cao điểm** (17:00–21:00): giá trung bình.
-  - **Giờ VIP** (09:00–14:00 và 21:00–23:00): giá cao nhất.
-- **Toggle Giờ Vàng:** bật lên → tất cả mức giá tăng thêm 10%.
-
-### FE-02.5 — Sơ đồ mặt bằng real-time
-- Refresh dữ liệu tự động mỗi 30 giây để giữ thông tin luôn cập nhật.
-- Click ô sân → xem thông tin booking và đổi trạng thái sân nếu cần.
-
-### FE-02.6 — Lịch bảo trì
-- Trước khi lưu: hệ thống kiểm tra toàn bộ booking trong khoảng thời gian bảo trì.
-- Nếu phát hiện booking trùng → hiện danh sách chi tiết (tên khách, giờ đặt, SĐT).
-- Sau khi lưu: sân tự chuyển sang `maintenance`. Khi đánh dấu hoàn thành: sân tự chuyển về `available`.
-
-### FE-02.7 — Tìm kiếm sân nâng cao
-- Chỉ trả về sân `available` trong khung giờ đã chọn — không hiển thị sân bảo trì hoặc đã có người đặt.
-- Nếu không có sân phù hợp → hiện thông báo thay vì để trang trống.
-
-### FE-02.9 — Lịch sử sử dụng sân
-- Thống kê tự tính: Tổng số lượt đặt, Tổng doanh thu, Thời lượng trung bình, Sân được đặt nhiều nhất, Khung giờ hot nhất.
-- Có biểu đồ cột thể hiện doanh thu theo từng sân.
-
-### FE-02.10 — Quản lý thiết bị tồn kho
-- Cảnh báo tự động so sánh `quantity` với `minQuantity` sau mỗi lần cập nhật.
-- Khi `quantity = 0`: banner đỏ xuất hiện ở đầu trang, không thể bỏ qua.
-
----
-
-## 7. Validation (Kiểm tra dữ liệu đầu vào)
-
-Trước khi lưu bất kỳ thông tin nào, hệ thống kiểm tra:
-
-| Trường dữ liệu | Điều kiện hợp lệ |
+| Thông tin | Chi tiết |
 |---|---|
-| Tên sân | Không để trống, tối đa 100 ký tự, không trùng tên sân đã có |
-| Loại sân | Phải chọn một trong: Standard / VIP / Double |
-| Giá/giờ | Số nguyên dương, tối thiểu 10.000 VNĐ |
-| Ảnh upload | JPG / PNG / WebP, tối đa 5MB/ảnh, tối đa 5 ảnh |
-| Ngày bảo trì | Phải từ ngày hôm nay trở đi |
-| Thời lượng bảo trì | Từ 1 đến 24 giờ |
-| Số lượng tồn kho | Không được âm (>= 0) |
-| Ngày tìm kiếm sân | Phải từ ngày hôm nay trở đi |
+| **Tên dự án** | Hệ thống Quản lý và Đặt sân Cầu lông |
+| **Người review các Test** | |
+| **Mô tả** | Test case cho toàn bộ chức năng của hệ thống đặt sân cầu lông |
+| **Mục tiêu kiểm thử** | Kiểm tra tất cả các chức năng hoạt động đúng yêu cầu |
+| **Môi trường kiểm thử** | Use Postman for API Testing, Use Google Chrome for FE Testing, Use React Dev Tools |
 
 ---
 
-## 8. Business Rules (Quy tắc nghiệp vụ)
+## 1. MODULE ĐĂNG NHẬP (Authentication - Login)
 
-Đây là những quy tắc không thể bỏ qua, được áp dụng xuyên suốt module:
-
-1. **Không được xóa sân đang có booking:** Nếu sân vẫn còn lịch đặt chưa hoàn thành, nút "Xóa" sẽ bị vô hiệu hóa và có giải thích lý do.
-
-2. **Thay đổi giá không ảnh hưởng booking cũ:** Booking đã được xác nhận trước đó luôn giữ mức giá tại thời điểm đặt. Chỉ booking mới mới áp dụng giá mới.
-
-3. **Bảo trì có thể ghi đè booking (nhưng phải xác nhận):** Hệ thống cảnh báo nhưng không ngăn cản. Admin vẫn có thể tạo bảo trì trong giờ đã có booking — nhưng phải tự liên hệ khách để sắp xếp lại.
-
-4. **Giờ Vàng áp dụng cho tất cả sân:** Không thể bật Giờ Vàng riêng cho một sân. Khi bật, mọi sân đều tăng giá 10%.
-
-5. **Sân bảo trì / đóng cửa không xuất hiện trong kết quả tìm kiếm của User.**
-
-6. **Số lượng tồn kho không thể âm:** Dù Admin hay Staff nhập thủ công, giá trị -1 hay số âm bất kỳ sẽ bị từ chối.
-
-7. **User không thể truy cập trang Admin/Staff:** Hệ thống chặn theo role, chuyển hướng về trang phù hợp nếu truy cập sai quyền.
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_LOGIN_001 | 1. Người dùng có tài khoản hợp lệ trong hệ thống. 2. Hệ thống hoạt động bình thường và có thể truy cập. | 1. Mở trang đăng nhập (/login). 2. Nhập thông tin đăng nhập hợp lệ. 3. Nhấn nút "Đăng nhập". | - Email: example_user@example.com - Password: password123 | 1. Đăng nhập thành công. 2. Chuyển hướng đến trang dashboard tương ứng với role. 3. Hiển thị thông tin người dùng. | | Pass | Medium | Low | Nếu đăng nhập thất bại, kiểm tra credentials và ghi nhận lỗi cụ thể. |
+| TC_LOGIN_002 | 1. Hệ thống hoạt động bình thường. | 1. Mở trang đăng nhập. 2. Nhập email đúng nhưng mật khẩu sai. 3. Nhấn nút "Đăng nhập". | - Email: example_user@example.com - Password: wrongpassword | 1. Đăng nhập thất bại. 2. Hiển thị thông báo lỗi "Sai thông tin đăng nhập". 3. Vẫn ở trang đăng nhập. | | Pass | Medium | Medium | Kiểm tra thông báo lỗi hiển thị rõ ràng. |
+| TC_LOGIN_003 | 1. Hệ thống hoạt động bình thường. | 1. Mở trang đăng nhập. 2. Nhập email không tồn tại. 3. Nhấn nút "Đăng nhập". | - Email: notexist@example.com - Password: password123 | 1. Đăng nhập thất bại. 2. Hiển thị thông báo lỗi phù hợp. 3. Vẫn ở trang đăng nhập. | | Pass | Medium | Medium | |
+| TC_LOGIN_004 | 1. Hệ thống hoạt động bình thường. | 1. Mở trang đăng nhập. 2. Để trống email và mật khẩu. 3. Nhấn nút "Đăng nhập". | - Email: (trống) - Password: (trống) | 1. Form validation ngăn submit. 2. Hiển thị thông báo yêu cầu nhập thông tin. | | Pass | Low | Low | Kiểm tra required attribute trên form. |
+| TC_LOGIN_005 | 1. Hệ thống hoạt động bình thường. | 1. Mở trang đăng nhập. 2. Nhập email sai định dạng. 3. Nhấn nút "Đăng nhập". | - Email: invalid-email - Password: password123 | 1. Form validation báo lỗi email không hợp lệ. 2. Không gửi request đến server. | | Pass | Low | Low | |
+| TC_LOGIN_006 | 1. Người dùng có tài khoản admin. | 1. Mở trang đăng nhập. 2. Đăng nhập với tài khoản admin. 3. Nhấn "Đăng nhập". | - Email: admin@example.com - Password: admin123 | 1. Đăng nhập thành công. 2. Chuyển hướng đến /admin/dashboard. | | Pass | High | High | Kiểm tra phân quyền đúng role admin. |
+| TC_LOGIN_007 | 1. Người dùng có tài khoản owner. | 1. Mở trang đăng nhập. 2. Đăng nhập với tài khoản owner. 3. Nhấn "Đăng nhập". | - Email: owner@example.com - Password: owner123 | 1. Đăng nhập thành công. 2. Chuyển hướng đến /owner/dashboard. | | Pass | High | High | Kiểm tra phân quyền đúng role owner. |
+| TC_LOGIN_008 | 1. Người dùng có tài khoản staff. | 1. Mở trang đăng nhập. 2. Đăng nhập với tài khoản staff. 3. Nhấn "Đăng nhập". | - Email: staff@example.com - Password: staff123 | 1. Đăng nhập thành công. 2. Chuyển hướng đến /staff/dashboard. | | Pass | High | High | Kiểm tra phân quyền đúng role staff. |
+| TC_LOGIN_009 | 1. Hệ thống hoạt động. | 1. Mở trang đăng nhập. 2. Nhấn link "Quên mật khẩu?". | Không có | 1. Chuyển hướng đến trang /forgot-password. 2. Trang quên mật khẩu hiển thị đúng. | | Pass | Low | Low | |
+| TC_LOGIN_010 | 1. Hệ thống hoạt động. | 1. Mở trang đăng nhập. 2. Nhấn link "Đăng ký ngay". | Không có | 1. Chuyển hướng đến trang /register. 2. Trang đăng ký hiển thị đúng. | | Pass | Low | Low | |
 
 ---
 
-## 9. Functionalities (Tổng hợp chức năng)
+## 2. MODULE ĐĂNG KÝ (Authentication - Register)
 
-| Mã chức năng | Tên | Ai dùng |
-|---|---|---|
-| FE-02.1 | Thêm / Sửa sân, kiểm tra trùng tên | Admin |
-| FE-02.2 | Upload ảnh sân | Admin |
-| FE-02.3 | Phân loại sân (Standard / VIP / Double) | Admin |
-| FE-02.4 | Cấu hình giá động + Giờ Vàng | Admin |
-| FE-02.5 | Sơ đồ mặt bằng + đổi trạng thái sân | Admin, Staff |
-| FE-02.6 | Tạo / xem lịch bảo trì, cảnh báo booking trùng | Admin |
-| FE-02.7 | Tìm kiếm sân nâng cao theo ngày/giờ/loại | User, Staff |
-| FE-02.8 | Sơ đồ mặt bằng xem nhanh (Staff) | Staff |
-| FE-02.9 | Lịch sử sử dụng sân + thống kê + biểu đồ | Admin |
-| FE-02.10 | Quản lý thiết bị tồn kho + cảnh báo sắp hết | Staff |
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_REGISTER_001 | 1. Trang đăng ký hoạt động. 2. Hệ thống có thể xử lý đăng ký. | 1. Truy cập trang đăng ký (/register). 2. Điền đầy đủ thông tin hợp lệ. 3. Nhấn nút "Đăng ký". | - Họ tên: Nguyen Van A - Email: nguyenvana@example.com - SĐT: 0901234567 - Mật khẩu: P@ssword123 - Xác nhận MK: P@ssword123 | 1. Đăng ký thành công. 2. Chuyển hướng đến /user/dashboard. 3. Tài khoản được tạo trong hệ thống. | | Pass | Medium | High | Kiểm tra dữ liệu lưu đúng vào DB. |
+| TC_REGISTER_002 | 1. Trang đăng ký hoạt động. | 1. Truy cập trang đăng ký. 2. Nhập mật khẩu và xác nhận mật khẩu khác nhau. 3. Nhấn "Đăng ký". | - Họ tên: Nguyen Van B - Email: test@example.com - SĐT: 0909876543 - Mật khẩu: P@ssword123 - Xác nhận MK: DifferentPass | 1. Đăng ký thất bại. 2. Hiển thị lỗi "Mật khẩu xác nhận không khớp". | | Pass | Medium | High | |
+| TC_REGISTER_003 | 1. Email đã tồn tại trong hệ thống. | 1. Truy cập trang đăng ký. 2. Nhập email đã tồn tại. 3. Nhấn "Đăng ký". | - Họ tên: Nguyen Van C - Email: existing@example.com - SĐT: 0912345678 - Mật khẩu: P@ssword123 - Xác nhận MK: P@ssword123 | 1. Đăng ký thất bại. 2. Hiển thị lỗi "Email đã tồn tại". | | Pass | Medium | High | |
+| TC_REGISTER_004 | 1. Trang đăng ký hoạt động. | 1. Truy cập trang đăng ký. 2. Để trống tất cả các trường. 3. Nhấn "Đăng ký". | - Tất cả các trường: (trống) | 1. Form validation ngăn submit. 2. Hiển thị thông báo yêu cầu nhập. | | Pass | Low | Low | |
+| TC_REGISTER_005 | 1. Trang đăng ký hoạt động. | 1. Truy cập trang đăng ký. 2. Nhập email sai định dạng. 3. Nhấn "Đăng ký". | - Họ tên: Test User - Email: invalid-email - SĐT: 0901234567 - Mật khẩu: P@ssword123 - Xác nhận MK: P@ssword123 | 1. Form validation báo lỗi email không hợp lệ. | | Pass | Low | Low | |
+| TC_REGISTER_006 | 1. Trang đăng ký hoạt động. | 1. Truy cập trang đăng ký. 2. Nhấn link "Đăng nhập". | Không có | 1. Chuyển hướng đến trang /login. | | Pass | Low | Low | |
 
 ---
 
-## 10. Normal Cases (Trường hợp thông thường — hệ thống hoạt động đúng)
+## 3. MODULE QUÊN MẬT KHẨU (Forgot Password)
 
-**Trường hợp 1:** Admin thêm sân "Sân 9" chưa tồn tại trong hệ thống.
-> ✅ Hệ thống lưu thành công, "Sân 9" xuất hiện trong bảng danh sách và sơ đồ mặt bằng ngay lập tức.
-
-**Trường hợp 2:** Admin bật Giờ Vàng lúc 15:00.
-> ✅ Toàn bộ mức giá tăng 10%. Các khách đặt sân từ 15:00 trở đi sẽ thấy giá mới. Khách đặt trước đó không bị ảnh hưởng.
-
-**Trường hợp 3:** Admin tạo lịch bảo trì cho "Sân 3" vào ngày mai, khoảng thời gian này không có ai đặt.
-> ✅ Lịch bảo trì được tạo ngay, "Sân 3" chuyển sang trạng thái đỏ trên sơ đồ mặt bằng. Không có cảnh báo nào.
-
-**Trường hợp 4:** Staff nhập lại số lượng cầu lông từ 3 lên 15 hộp (ngưỡng tối thiểu là 10).
-> ✅ Số lượng được cập nhật, badge chuyển từ "Sắp hết" sang "Đủ hàng", không còn cảnh báo.
-
-**Trường hợp 5:** User tìm sân vào thứ 7 khung giờ 17:00–18:00, loại Standard.
-> ✅ Hệ thống trả về danh sách các sân Standard còn trống trong khung giờ đó, sắp xếp theo giá.
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_FORGOT_001 | 1. Trang quên mật khẩu hoạt động. 2. Email đã đăng ký trong hệ thống. | 1. Truy cập /forgot-password. 2. Nhập email hợp lệ. 3. Nhấn "Gửi email khôi phục". | - Email: user@example.com | 1. Hiển thị thông báo thành công "Email khôi phục đã được gửi". 2. Email khôi phục được gửi đến hộp thư. | | Pass | Medium | High | |
+| TC_FORGOT_002 | 1. Trang quên mật khẩu hoạt động. | 1. Truy cập /forgot-password. 2. Để trống email. 3. Nhấn "Gửi email khôi phục". | - Email: (trống) | 1. Form validation ngăn submit. | | Pass | Low | Low | |
+| TC_FORGOT_003 | 1. Trang quên mật khẩu hoạt động. | 1. Truy cập /forgot-password. 2. Nhấn link "Quay lại đăng nhập". | Không có | 1. Chuyển hướng về trang /login. | | Pass | Low | Low | |
 
 ---
 
-## 11. Abnormal Cases (Trường hợp bất thường — hệ thống xử lý khi có vấn đề)
+## 4. MODULE TRANG CÔNG KHAI (Public Pages)
 
-**Trường hợp 1:** Admin thêm sân tên "Sân 1" — tên đã tồn tại.
-> ❌ Hệ thống không lưu, hiện thông báo lỗi: *"Tên sân đã tồn tại. Vui lòng chọn tên khác."* Form vẫn giữ nguyên nội dung để Admin sửa.
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_HOME_001 | 1. Hệ thống hoạt động. | 1. Truy cập trang chủ (/). | Không có | 1. Trang chủ hiển thị đầy đủ thông tin. 2. Các section hiển thị đúng (banner, giới thiệu, sân nổi bật). | | Pass | Low | Low | |
+| TC_COURTS_001 | 1. Hệ thống hoạt động. 2. Có dữ liệu sân trong DB. | 1. Truy cập trang danh sách sân (/courts). | Không có | 1. Hiển thị danh sách sân cầu lông. 2. Mỗi sân có thông tin cơ bản (tên, giá, trạng thái). | | Pass | Medium | Medium | |
+| TC_COURTS_002 | 1. Hệ thống hoạt động. 2. Có sân với ID hợp lệ. | 1. Truy cập trang chi tiết sân (/courts/:id). | - ID sân: 1 | 1. Hiển thị thông tin chi tiết sân. 2. Hiển thị giá, lịch trống, tiện ích. | | Pass | Medium | Medium | |
+| TC_ABOUT_001 | 1. Hệ thống hoạt động. | 1. Truy cập trang giới thiệu (/about). | Không có | 1. Trang giới thiệu hiển thị đúng nội dung. | | Pass | Low | Low | |
 
-**Trường hợp 2:** Admin muốn xóa "Sân 2" đang có 3 booking chưa hoàn thành.
-> ❌ Nút "Xóa" bị vô hiệu hóa và hiện tooltip: *"Không thể xóa sân đang có booking chưa hoàn thành."*
+---
 
-**Trường hợp 3:** Admin tạo lịch bảo trì "Sân 4" từ 17:00–19:00, nhưng trong giờ đó có 2 booking.
-> ⚠️ Hệ thống không tự động hủy booking mà hiện bảng cảnh báo: *"2 booking sẽ bị ảnh hưởng: [Nguyễn Văn A - 17:00, Trần Thị B - 18:00]."* Admin xác nhận → lịch bảo trì vẫn được tạo nhưng Admin phải tự liên hệ khách.
+## 5. MODULE NGƯỜI DÙNG (User Dashboard)
 
-**Trường hợp 4:** Staff nhập số lượng thiết bị là -5.
-> ❌ Hệ thống không lưu, hiện thông báo: *"Số lượng không được nhỏ hơn 0."*
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_USER_DASH_001 | 1. Đã đăng nhập với role user. | 1. Truy cập /user/dashboard. | Không có | 1. Hiển thị dashboard người dùng. 2. Thống kê booking, lịch sử gần đây. | | Pass | Medium | Medium | |
+| TC_USER_BOOK_001 | 1. Đã đăng nhập với role user. 2. Có sân available. | 1. Truy cập /user/bookings. 2. Chọn sân cần đặt. 3. Chọn ngày và khung giờ. 4. Xác nhận đặt sân. | - Sân: Sân 1 - Ngày: 15/03/2026 - Giờ: 08:00-10:00 | 1. Đặt sân thành công. 2. Booking hiển thị trong danh sách. 3. Trạng thái booking: Đã xác nhận. | | Pass | High | High | Kiểm tra booking không bị trùng lịch. |
+| TC_USER_BOOK_002 | 1. Đã đăng nhập với role user. 2. Có booking trước đó. | 1. Truy cập /user/bookings. 2. Xem danh sách booking. | Không có | 1. Hiển thị danh sách booking của user. 2. Mỗi booking hiển thị đầy đủ thông tin. | | Pass | Medium | Medium | |
+| TC_USER_BOOK_003 | 1. Đã đăng nhập với role user. 2. Có booking chưa diễn ra. | 1. Truy cập /user/bookings. 2. Chọn booking cần hủy. 3. Nhấn "Hủy booking". 4. Xác nhận hủy. | - Booking ID: BK001 | 1. Hủy booking thành công. 2. Trạng thái chuyển sang "Đã hủy". | | Pass | High | High | Kiểm tra chính sách hủy. |
+| TC_USER_CAL_001 | 1. Đã đăng nhập với role user. | 1. Truy cập /user/calendar. 2. Xem lịch. | Không có | 1. Hiển thị lịch với các slot trống/đã đặt. 2. Có thể chuyển ngày/tuần/tháng. | | Pass | Medium | Medium | |
+| TC_USER_RECUR_001 | 1. Đã đăng nhập với role user. | 1. Truy cập /user/recurring. 2. Tạo booking định kỳ. 3. Chọn lịch lặp lại. 4. Xác nhận. | - Sân: Sân 2 - Ngày bắt đầu: 15/03/2026 - Giờ: 18:00-20:00 - Lặp: Hàng tuần - Số tuần: 4 | 1. Tạo booking định kỳ thành công. 2. Hiển thị các booking trong danh sách. | | Pass | High | High | |
+| TC_USER_WAIT_001 | 1. Đã đăng nhập với role user. 2. Slot mong muốn đã đầy. | 1. Truy cập /user/waitlist. 2. Đăng ký chờ cho slot mong muốn. | - Sân: Sân 1 - Ngày: 16/03/2026 - Giờ: 08:00-10:00 | 1. Đăng ký vào danh sách chờ thành công. 2. Nhận thông báo khi slot trống. | | Pass | Medium | Medium | |
+| TC_USER_PROF_001 | 1. Đã đăng nhập với role user. | 1. Truy cập /user/profile. 2. Cập nhật thông tin cá nhân. 3. Nhấn "Lưu". | - Họ tên: Nguyen Van A Updated - SĐT: 0909999888 | 1. Cập nhật thông tin thành công. 2. Thông tin mới hiển thị đúng. | | Pass | Medium | Medium | |
+| TC_USER_PROF_002 | 1. Đã đăng nhập với role user. | 1. Truy cập /user/profile. 2. Đổi mật khẩu. 3. Nhấn "Lưu". | - MK cũ: oldpass123 - MK mới: newpass456 - Xác nhận: newpass456 | 1. Đổi mật khẩu thành công. 2. Đăng nhập lại với mật khẩu mới OK. | | Pass | High | High | |
+| TC_USER_NOTI_001 | 1. Đã đăng nhập với role user. 2. Có thông báo trong hệ thống. | 1. Truy cập /user/notifications. | Không có | 1. Hiển thị danh sách thông báo. 2. Thông báo mới nhất ở trên cùng. | | Pass | Low | Low | |
+| TC_USER_VOUCH_001 | 1. Đã đăng nhập với role user. | 1. Truy cập /user/vouchers. | Không có | 1. Hiển thị danh sách voucher khả dụng. 2. Thông tin voucher (mã, giảm giá, hạn sử dụng). | | Pass | Low | Medium | |
 
-**Trường hợp 5:** User tìm kiếm sân vào ngày 01/01/2024 (đã qua).
-> ❌ Hệ thống không cho chọn ngày quá khứ trong date picker. Nếu nhập thủ công → hiện thông báo: *"Vui lòng chọn ngày từ hôm nay trở đi."*
+---
 
-**Trường hợp 6:** User tìm kiếm sân vào thứ 7 khung giờ 17:00–18:00 nhưng tất cả sân đều đã có người đặt.
-> ⚠️ Không hiển thị lỗi đỏ, thay vào đó hiện thông báo thân thiện: *"Không tìm thấy sân trống trong khung giờ này. Hãy thử ngày hoặc giờ khác."*
+## 6. MODULE NHÂN VIÊN (Staff Dashboard)
 
-**Trường hợp 7:** Upload ảnh sân file .docx sai định dạng.
-> ❌ Hệ thống từ chối file, hiện thông báo: *"Chỉ hỗ trợ định dạng JPG, PNG, WebP."*
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_STAFF_DASH_001 | 1. Đã đăng nhập với role staff. | 1. Truy cập /staff/dashboard. | Không có | 1. Hiển thị dashboard nhân viên. 2. Thống kê booking hôm nay, check-in, tình trạng sân. | | Pass | Medium | Medium | |
+| TC_STAFF_CHECKIN_001 | 1. Đã đăng nhập với role staff. 2. Có booking hôm nay. | 1. Truy cập /staff/checkin. 2. Tìm booking cần check-in. 3. Xác nhận check-in. | - Mã booking: BK001 hoặc tên khách | 1. Check-in thành công. 2. Trạng thái booking chuyển sang "Đã check-in". | | Pass | High | High | |
+| TC_STAFF_CHECKIN_002 | 1. Đã đăng nhập với role staff. 2. Khách đã check-in. | 1. Truy cập /staff/checkin. 2. Tìm booking đã check-in. 3. Xác nhận check-out. | - Mã booking: BK001 | 1. Check-out thành công. 2. Trạng thái booking chuyển sang "Hoàn thành". 3. Tính phí phát sinh (nếu có). | | Pass | High | High | |
+| TC_STAFF_COUNTER_001 | 1. Đã đăng nhập với role staff. 2. Có sân trống. | 1. Truy cập /staff/booking. 2. Đặt sân cho khách tại quầy. 3. Điền thông tin khách. 4. Xác nhận đặt sân. | - Tên khách: Tran Van B - SĐT: 0901111222 - Sân: Sân 3 - Giờ: 14:00-16:00 | 1. Đặt sân tại quầy thành công. 2. Booking mới xuất hiện trong danh sách. | | Pass | High | High | |
+| TC_STAFF_PAY_001 | 1. Đã đăng nhập với role staff. 2. Khách cần thanh toán. | 1. Truy cập /staff/payment. 2. Tìm booking cần thanh toán. 3. Xử lý thanh toán. 4. Xác nhận. | - Mã booking: BK001 - Phương thức: Tiền mặt - Số tiền: 200.000đ | 1. Thanh toán thành công. 2. Hóa đơn được tạo. | | Pass | High | High | |
+| TC_STAFF_COURTS_001 | 1. Đã đăng nhập với role staff. | 1. Truy cập /staff/courts. | Không có | 1. Hiển thị danh sách sân và trạng thái. 2. Có thể cập nhật trạng thái sân. | | Pass | Medium | Medium | |
+| TC_STAFF_EQUIP_001 | 1. Đã đăng nhập với role staff. | 1. Truy cập /staff/equipment. 2. Xem danh sách thiết bị. | Không có | 1. Hiển thị inventory thiết bị. 2. Số lượng, tình trạng từng thiết bị. | | Pass | Medium | Medium | |
+| TC_STAFF_REPAIR_001 | 1. Đã đăng nhập với role staff. | 1. Truy cập /staff/repairs. 2. Tạo yêu cầu sửa chữa. | - Sân: Sân 2 - Mô tả: Lưới rách - Mức độ: Trung bình | 1. Tạo yêu cầu sửa chữa thành công. 2. Hiển thị trong danh sách lịch sửa chữa. | | Pass | Medium | High | |
+| TC_STAFF_VOUCH_001 | 1. Đã đăng nhập với role staff. | 1. Truy cập /staff/vouchers. 2. Xem danh sách voucher. 3. Áp dụng voucher cho khách. | - Mã voucher: GIAM20 - Booking: BK002 | 1. Áp dụng voucher thành công. 2. Giá booking được giảm đúng. | | Pass | Medium | High | |
+| TC_STAFF_PROF_001 | 1. Đã đăng nhập với role staff. | 1. Truy cập /staff/profile. 2. Xem và cập nhật thông tin cá nhân. | - Họ tên: Staff Updated - SĐT: 0908888777 | 1. Cập nhật thông tin thành công. | | Pass | Medium | Medium | |
+| TC_STAFF_SEC_001 | 1. Đã đăng nhập với role staff. | 1. Truy cập /staff/security. | Không có | 1. Hiển thị cài đặt bảo mật. 2. Có thể đổi mật khẩu, cài đặt 2FA. | | Pass | Medium | High | |
 
-**Trường hợp 8:** Upload ảnh sân file 8MB (quá giới hạn 5MB).
-> ❌ Hệ thống từ chối file, hiện thông báo: *"Ảnh quá lớn. Kích thước tối đa là 5MB."*
+---
 
-**Trường hợp 9:** Mất kết nối internet khi đang tải sơ đồ mặt bằng.
-> ⚠️ Trang hiển thị skeleton loading (hiệu ứng chờ), sau 10 giây không có dữ liệu thì hiện thông báo: *"Không thể kết nối. Kiểm tra mạng và thử lại."*
+## 7. MODULE CHỦ SÂN (Owner Dashboard)
 
-**Trường hợp 10:** Giá sân nhập là 0 hoặc số âm.
-> ❌ Hệ thống không lưu, hiện thông báo: *"Giá phải lớn hơn 0 VNĐ."*
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_OWNER_DASH_001 | 1. Đã đăng nhập với role owner. | 1. Truy cập /owner/dashboard. | Không có | 1. Hiển thị dashboard chủ sân. 2. Thống kê doanh thu, booking, tình trạng sân. | | Pass | Medium | Medium | |
+| TC_OWNER_COURTS_001 | 1. Đã đăng nhập với role owner. | 1. Truy cập /owner/courts. 2. Xem danh sách sân. | Không có | 1. Hiển thị tất cả sân của owner. 2. Trạng thái, thông tin từng sân. | | Pass | Medium | Medium | |
+| TC_OWNER_COURTS_002 | 1. Đã đăng nhập với role owner. | 1. Truy cập /owner/courts. 2. Thêm sân mới. 3. Điền thông tin. 4. Lưu. | - Tên sân: Sân 5 - Loại: Đơn - Giá: 150.000đ/h - Mô tả: Sân trong nhà | 1. Thêm sân thành công. 2. Sân mới hiển thị trong danh sách. | | Pass | High | High | |
+| TC_OWNER_COURTS_003 | 1. Đã đăng nhập với role owner. 2. Có sân cần chỉnh sửa. | 1. Truy cập /owner/courts. 2. Chọn sân cần sửa. 3. Cập nhật thông tin. 4. Lưu. | - Giá mới: 180.000đ/h | 1. Cập nhật thành công. 2. Thông tin mới hiển thị đúng. | | Pass | Medium | Medium | |
+| TC_OWNER_BOOK_001 | 1. Đã đăng nhập với role owner. 2. Có booking. | 1. Truy cập /owner/bookings. | Không có | 1. Hiển thị tất cả booking trên sân của owner. 2. Filter/tìm kiếm hoạt động. | | Pass | Medium | Medium | |
+| TC_OWNER_REV_001 | 1. Đã đăng nhập với role owner. 2. Có dữ liệu doanh thu. | 1. Truy cập /owner/revenue. 2. Xem báo cáo doanh thu. | - Khoảng thời gian: Tháng 3/2026 | 1. Hiển thị biểu đồ doanh thu. 2. Tổng doanh thu, chi tiết theo ngày/tuần. | | Pass | High | High | |
+
+---
+
+## 8. MODULE QUẢN TRỊ - DASHBOARD (Admin Dashboard)
+
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_ADMIN_DASH_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/dashboard. | Không có | 1. Hiển thị tổng quan hệ thống. 2. Thống kê người dùng, sân, booking, doanh thu. | | Pass | Medium | Medium | |
+
+---
+
+## 9. MODULE QUẢN TRỊ - QUẢN LÝ TÀI KHOẢN (Admin Accounts)
+
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_ADMIN_USER_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/users. 2. Xem danh sách người dùng. | Không có | 1. Hiển thị danh sách tất cả người dùng. 2. Thông tin: tên, email, role, trạng thái. | | Pass | Medium | Medium | |
+| TC_ADMIN_USER_002 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/users. 2. Tìm kiếm người dùng. | - Từ khóa: "Nguyen" | 1. Hiển thị kết quả tìm kiếm phù hợp. | | Pass | Medium | Medium | |
+| TC_ADMIN_USER_003 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/users. 2. Chọn người dùng. 3. Khóa/Mở khóa tài khoản. | - User ID: U001 | 1. Khóa/mở khóa thành công. 2. Trạng thái cập nhật đúng. | | Pass | High | High | |
+| TC_ADMIN_PERM_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/users/permissions. 2. Xem và chỉnh sửa phân quyền. | - Role: staff - Quyền: Quản lý booking | 1. Hiển thị bảng phân quyền. 2. Cập nhật quyền thành công. | | Pass | High | High | |
+| TC_ADMIN_LOG_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/users/logs. | Không có | 1. Hiển thị system logs. 2. Filter theo thời gian, loại hoạt động. | | Pass | Medium | Medium | |
+| TC_ADMIN_OAUTH_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/users/oauth. 2. Cấu hình OAuth. | - Provider: Google - Client ID: xxx - Client Secret: xxx | 1. Cấu hình OAuth thành công. 2. Đăng nhập qua Google hoạt động. | | Pass | High | High | |
+| TC_ADMIN_SEC_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/users/security. 2. Cấu hình bảo mật. | - 2FA: Bật - Session timeout: 30 phút | 1. Cài đặt bảo mật được lưu thành công. | | Pass | High | High | |
+
+---
+
+## 10. MODULE QUẢN TRỊ - QUẢN LÝ SÂN (Admin Courts)
+
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_ADMIN_COURT_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/courts. 2. Xem danh sách sân. | Không có | 1. Hiển thị tất cả sân trong hệ thống. 2. Thông tin chi tiết từng sân. | | Pass | Medium | Medium | |
+| TC_ADMIN_COURT_002 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/courts. 2. Thêm sân mới. 3. Điền thông tin. 4. Lưu. | - Tên sân: Sân Test - Loại: Đôi - Giá: 200.000đ/h - Chủ sân: Owner A | 1. Thêm sân thành công. 2. Sân mới xuất hiện trong danh sách. | | Pass | High | High | |
+| TC_ADMIN_COURT_003 | 1. Đã đăng nhập với role admin. 2. Có sân cần xóa. | 1. Truy cập /admin/courts. 2. Chọn sân. 3. Nhấn "Xóa". 4. Xác nhận. | - Sân: Sân Test | 1. Xóa sân thành công. 2. Sân không còn trong danh sách. | | Pass | High | High | Kiểm tra booking liên quan khi xóa sân. |
+| TC_ADMIN_PRICE_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/courts/pricing. 2. Xem và cập nhật bảng giá. | - Sân: Sân 1 - Giờ cao điểm: 250.000đ/h - Giờ thường: 150.000đ/h | 1. Cập nhật giá thành công. 2. Giá mới áp dụng đúng. | | Pass | High | High | |
+| TC_ADMIN_MAINT_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/courts/maintenance. 2. Xem lịch bảo trì. 3. Thêm lịch bảo trì mới. | - Sân: Sân 2 - Ngày: 20/03/2026 - Mô tả: Bảo trì định kỳ | 1. Thêm lịch bảo trì thành công. 2. Sân tự động chuyển trạng thái. | | Pass | High | High | |
+| TC_ADMIN_FLOOR_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/courts/floor-plan. | Không có | 1. Hiển thị sơ đồ mặt bằng sân. 2. Trạng thái sân hiển thị trực quan. | | Pass | Medium | Medium | |
+| TC_ADMIN_REPAIR_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/courts/repairs. | Không có | 1. Hiển thị lịch sử sửa chữa. 2. Chi tiết từng lần sửa chữa. | | Pass | Medium | Medium | |
+| TC_ADMIN_ALERT_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/courts/alerts. | Không có | 1. Hiển thị cảnh báo thiết bị. 2. Mức độ ưu tiên các cảnh báo. | | Pass | Medium | High | |
+| TC_ADMIN_USAGE_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/courts/history. | Không có | 1. Hiển thị lịch sử sử dụng sân. 2. Filter theo thời gian, sân. | | Pass | Medium | Medium | |
+
+---
+
+## 11. MODULE QUẢN TRỊ - QUẢN LÝ BOOKING (Admin Bookings)
+
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_ADMIN_BOOK_001 | 1. Đã đăng nhập với role admin. 2. Có booking trong hệ thống. | 1. Truy cập /admin/bookings. | Không có | 1. Hiển thị tất cả booking. 2. Filter theo trạng thái, ngày, sân. | | Pass | Medium | Medium | |
+| TC_ADMIN_BOOK_002 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/bookings. 2. Chỉnh sửa booking. | - Booking: BK001 - Giờ mới: 10:00-12:00 | 1. Cập nhật booking thành công. 2. Thông tin mới hiển thị đúng. | | Pass | High | High | |
+| TC_ADMIN_BOOK_003 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/bookings. 2. Hủy booking. 3. Xác nhận. | - Booking: BK001 | 1. Hủy booking thành công. 2. Trạng thái: Đã hủy. | | Pass | High | High | |
+| TC_ADMIN_CAL_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/bookings/calendar. | Không có | 1. Hiển thị lịch live với booking. 2. Có thể xem theo ngày/tuần/tháng. | | Pass | Medium | Medium | |
+| TC_ADMIN_CONF_001 | 1. Đã đăng nhập với role admin. 2. Có booking xung đột. | 1. Truy cập /admin/bookings/conflicts. | Không có | 1. Hiển thị danh sách xung đột booking. 2. Có công cụ giải quyết xung đột. | | Pass | High | High | |
+| TC_ADMIN_POL_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/bookings/policies. 2. Cấu hình chính sách hủy. | - Thời gian hủy miễn phí: 24h - Phí hủy muộn: 50% | 1. Lưu chính sách thành công. 2. Áp dụng cho booking mới. | | Pass | High | High | |
+| TC_ADMIN_CHKIN_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/bookings/checkin. | Không có | 1. Hiển thị danh sách check-in hôm nay. 2. Trạng thái check-in/out. | | Pass | Medium | Medium | |
+| TC_ADMIN_BERR_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/bookings/errors. | Không có | 1. Hiển thị booking lỗi. 2. Chi tiết lỗi và công cụ xử lý. | | Pass | High | High | |
+
+---
+
+## 12. MODULE QUẢN TRỊ - TÀI CHÍNH (Admin Finance)
+
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_ADMIN_DEP_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/finance/deposits. | Không có | 1. Hiển thị danh sách đặt cọc. 2. Trạng thái, số tiền, thời gian. | | Pass | High | High | |
+| TC_ADMIN_CPAY_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/finance/counter. | Không có | 1. Hiển thị thanh toán tại quầy. 2. Chi tiết giao dịch. | | Pass | High | High | |
+| TC_ADMIN_OT_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/finance/overtime. | Không có | 1. Hiển thị phí phát sinh quá giờ. 2. Chi tiết phí, booking liên quan. | | Pass | High | High | |
+| TC_ADMIN_FVOUCH_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/finance/vouchers. 2. Tạo voucher mới. | - Mã: GIAM30 - Giảm giá: 30% - Hạn sử dụng: 30/04/2026 - Số lượng: 100 | 1. Tạo voucher thành công. 2. Voucher xuất hiện trong danh sách. | | Pass | High | High | |
+| TC_ADMIN_WALLET_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/finance/wallets. | Không có | 1. Hiển thị danh sách ví người dùng. 2. Số dư, lịch sử giao dịch. | | Pass | High | High | |
+| TC_ADMIN_REVR_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/finance/revenue. 2. Xem báo cáo doanh thu. | - Thời gian: Tháng 3/2026 | 1. Hiển thị báo cáo doanh thu chi tiết. 2. Biểu đồ, bảng số liệu. | | Pass | High | High | |
+| TC_ADMIN_TERR_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/finance/transactions. | Không có | 1. Hiển thị lỗi giao dịch. 2. Công cụ xử lý lỗi. | | Pass | High | High | |
+
+---
+
+## 13. MODULE QUẢN TRỊ - THỐNG KÊ (Admin Statistics)
+
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_ADMIN_STAT_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/statistics. | Không có | 1. Hiển thị tổng quan thống kê. 2. Các chỉ số chính. | | Pass | Medium | Medium | |
+| TC_ADMIN_BANA_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/statistics/bookings. | Không có | 1. Hiển thị phân tích booking. 2. Biểu đồ xu hướng, tỉ lệ hủy. | | Pass | Medium | Medium | |
+| TC_ADMIN_OCC_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/statistics/occupancy. | Không có | 1. Hiển thị thống kê công suất sân. 2. Tỉ lệ sử dụng theo giờ/ngày. | | Pass | Medium | Medium | |
+| TC_ADMIN_PERF_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/statistics/performance. | Không có | 1. Hiển thị hiệu suất từng sân. 2. Doanh thu, tỉ lệ sử dụng. | | Pass | Medium | Medium | |
+| TC_ADMIN_REPT_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/statistics/reports. 2. Tạo báo cáo. | - Loại: Doanh thu - Thời gian: Q1/2026 - Định dạng: PDF | 1. Tạo báo cáo thành công. 2. Tải xuống file báo cáo. | | Pass | Medium | High | |
+
+---
+
+## 14. MODULE QUẢN TRỊ - CÀI ĐẶT (Admin Settings)
+
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_ADMIN_SET_001 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/settings. 2. Cập nhật cài đặt hệ thống. | - Tên hệ thống: Badminton Pro - Ngôn ngữ: Tiếng Việt - Múi giờ: UTC+7 | 1. Lưu cài đặt thành công. 2. Cài đặt mới được áp dụng. | | Pass | Medium | High | |
+| TC_ADMIN_SET_002 | 1. Đã đăng nhập với role admin. | 1. Truy cập /admin/settings. 2. Cấu hình email thông báo. | - SMTP Server: smtp.gmail.com - Port: 587 - Email: noreply@example.com | 1. Cấu hình email thành công. 2. Gửi email test OK. | | Pass | High | High | |
+
+---
+
+## 15. MODULE PHÂN QUYỀN & BẢO MẬT (Authorization)
+
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_AUTH_001 | 1. Chưa đăng nhập. | 1. Truy cập trực tiếp /admin/dashboard. | Không có | 1. Chuyển hướng đến trang /unauthorized hoặc /login. 2. Không cho phép truy cập. | | Pass | High | High | Kiểm tra ProtectedRoute hoạt động đúng. |
+| TC_AUTH_002 | 1. Đăng nhập với role user. | 1. Truy cập trực tiếp /admin/dashboard. | Không có | 1. Chuyển hướng đến trang /unauthorized. 2. Không cho phép truy cập admin. | | Pass | High | High | |
+| TC_AUTH_003 | 1. Đăng nhập với role user. | 1. Truy cập trực tiếp /staff/dashboard. | Không có | 1. Chuyển hướng đến /unauthorized. 2. Không cho phép truy cập staff. | | Pass | High | High | |
+| TC_AUTH_004 | 1. Đăng nhập với role staff. | 1. Truy cập trực tiếp /owner/dashboard. | Không có | 1. Chuyển hướng đến /unauthorized. 2. Không cho phép truy cập owner. | | Pass | High | High | |
+| TC_AUTH_005 | 1. Đăng nhập với role user. | 1. Truy cập trực tiếp /owner/revenue. | Không có | 1. Chuyển hướng đến /unauthorized. | | Pass | High | High | |
+
+---
+
+## 16. MODULE XỬ LÝ LỖI (Error Handling)
+
+| Test Case ID | Tiền điều kiện/Điều kiện trước | Các bước kiểm thử | Dữ liệu nhập | Các kết quả mong muốn | Các kết quả thực | Trạng thái thực thi | Mức độ Bug | Độ ưu tiên xử lý Bug | Các file đính kèm |
+|---|---|---|---|---|---|---|---|---|---|
+| TC_ERR_001 | 1. Hệ thống hoạt động. | 1. Truy cập URL không tồn tại (/xyz123). | Không có | 1. Hiển thị trang 404 Not Found. 2. Có link quay về trang chủ. | | Pass | Low | Low | |
+| TC_ERR_002 | 1. Hệ thống hoạt động. | 1. Truy cập /unauthorized. | Không có | 1. Hiển thị trang Unauthorized. 2. Thông báo không có quyền truy cập. | | Pass | Low | Low | |
